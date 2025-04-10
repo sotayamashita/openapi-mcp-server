@@ -1,5 +1,10 @@
 # openapi-mcp-server
 
+## Features
+
+🔌 **OpenAPI Integration** - Automatically converts OpenAPI/Swagger specifications into MCP tools  
+🧩 **Parameter Validation** - Automatically validates API parameters using Zod
+
 ## Installation
 
 ### Running on Claude Desktop
@@ -20,11 +25,7 @@ code ~/Library/Application\ Support/Claude/claude_desktop_config.json
         "/aboopenapi-mcp-server/src/index.ts",
         // OpenAPI/Swagger spec URL or absolute file path
         "/aboopenapi-mcp-server/demo/openapi.yml"
-      ],
-      "env": {
-        "BASE_URL": "http://localhost:3000",
-        "HEADERS": "{\"Authorization\": \"Bearer token_****\"}"
-      }
+      ]
     }
   }
 }
