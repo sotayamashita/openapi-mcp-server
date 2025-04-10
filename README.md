@@ -1,5 +1,7 @@
 # openapi-mcp-server
 
+[![MCP Server](https://badge.mcpx.dev?type=server "MCP Server")](https://modelcontextprotocol.io/introduction) ![ts](https://badgen.net/badge/-/TypeScript/blue?icon=typescript&label) [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+
 ## Features
 
 🔌 **OpenAPI Integration** - Automatically converts OpenAPI/Swagger specifications into MCP tools  
@@ -31,4 +33,4 @@ code ~/Library/Application\ Support/Claude/claude_desktop_config.json
 }
 ```
 
-_[🔍 Comprehensive Guide: How to Use MCP Server with Claude Desktop | Model Context Protocol](https://modelcontextprotocol.io/quickstart/user)_
+[🔍 _Comprehensive Guide: How to Use MCP Server with Claude Desktop | Model Context Protocol_](https://modelcontextprotocol.io/quickstart/user)
