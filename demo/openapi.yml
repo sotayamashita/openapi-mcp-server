@@ -1,0 +1,31 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI MCP Server Demo with OpenAPI v3.1.0
+  description: Test server for OpenAPI v3.1.0
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:1234
+    description: Development server
+
+paths:
+  /hello:
+    get:
+      summary: Returns a greeting
+      operationId: sayHi
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+            default: world
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
