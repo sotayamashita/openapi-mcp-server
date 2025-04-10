@@ -1,6 +1,6 @@
 # openapi-mcp-server
 
-[![MCP Server](https://badge.mcpx.dev?type=server "MCP Server")](https://modelcontextprotocol.io/introduction) [![Test](https://github.com/sotayamashita/openapi-mcp-server/actions/workflows/test.yml/badge.svg)](https://github.com/sotayamashita/openapi-mcp-server/actions/workflows/test.yml) ![ts](https://badgen.net/badge/-/TypeScript/blue?icon=typescript&label) [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+[![MCP Server](https://badge.mcpx.dev?type=server "MCP Server")](https://modelcontextprotocol.io/introduction) [![Test](https://github.com/sotayamashita/openapi-mcp-server/actions/workflows/test.yml/badge.svg)](https://github.com/sotayamashita/openapi-mcp-server/actions/workflows/test.yml) [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 The openapi-mcp-server is a powerful bridge between OpenAPI specifications and AI assistants using the Model Context Protocol (MCP). It automatically converts any OpenAPI/Swagger API specification into MCP tools that can be used by AI assistants like Claude Desktop. This enables AI assistants to seamlessly interact with your APIs, making them capable of performing real-world actions through your services without requiring custom integrations.
 
@@ -63,6 +63,15 @@ For more detailed instructions, see the [MCP quickstart guide](https://modelcont
 ## Development
 
 ```bash
+# Run simple api server for test using simple openapi.yml
+bun start:server
+
+# Run @modelcontextprotocol/inspector
+bun start:inspector
+
+# Run simple api server and @modelcontextprotocol/inspector concurrently
+bun start
+
 # Run tests
 bun test
 
@@ -75,7 +84,3 @@ bun test --coverage
 # Format code
 bun run format
 ```
-
-## License
-
-[MIT](LICENSE)
