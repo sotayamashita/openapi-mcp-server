@@ -135,35 +135,4 @@ bun run format
 
 ### Codebase Structure
 
-The codebase follows a modular organization pattern with clear separation of concerns:
-
-```
-src/
-├── cli/              # Command-line interface
-│   ├── args.ts       # CLI arguments processing
-│   └── index.ts      # CLI entry point
-├── config/           # Configuration management
-│   └── index.ts      # Environment variables and settings
-├── mcp/              # MCP protocol implementation
-│   ├── server.ts     # MCP server core functionality
-│   └── transport.ts  # Transport layer abstraction
-├── openapi/          # OpenAPI specification handling
-│   ├── client.ts     # OpenAPI client generation
-│   ├── parser.ts     # Spec parsing and validation
-│   └── schema.ts     # Schema validation and conversion
-├── tools/            # MCP tools management
-│   ├── builder.ts    # Tool generation from OpenAPI
-│   └── executor.ts   # Tool execution and response handling
-├── types/            # Type definitions
-│   └── index.ts      # Common type declarations
-└── index.ts          # Application entry point
-```
-
-### Module Responsibilities
-
-- **CLI Module**: Handles command-line arguments and user interaction
-- **Config Module**: Manages environment variables (BASE_URL, HEADERS) and configuration validation
-- **MCP Module**: Implements the Model Context Protocol server and transport layers
-- **OpenAPI Module**: Processes OpenAPI specifications, generates clients, and validates schemas
-- **Tools Module**: Converts OpenAPI operations to MCP tools and handles their execution
-- **Types Module**: Provides common type definitions across the application
+For details on the codebase structure and module responsibilities, see [Codebase Structure](./docs/codebase-structure.md).
