@@ -31,11 +31,11 @@ export async function createOpenApiClient(
   // バージョン固有の設定を適用
   if (version === "3.0.0") {
     // OpenAPI 3.0.0固有の設定
-    console.info("Using OpenAPI 3.0.0 client configuration");
+    // console.info("Using OpenAPI 3.0.0 client configuration");
     // 必要に応じて設定を追加
   } else if (version === "3.1.0") {
     // OpenAPI 3.1.0固有の設定
-    console.info("Using OpenAPI 3.1.0 client configuration");
+    // console.info("Using OpenAPI 3.1.0 client configuration");
     // 必要に応じて設定を追加
   }
 
