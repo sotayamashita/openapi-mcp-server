@@ -34,25 +34,40 @@
 - [ ] **MCP モジュール**
 
   - [ ] `src/mcp/server.ts`: MCPサーバーコア機能の実装
+    - [ ] MCPサーバーの初期化と設定
+    - [ ] クライアントとの接続管理
+    - [ ] メッセージの送受信
+    - [ ] プロトコル準拠の保証
   - [ ] `src/mcp/transport.ts`: トランスポート層の実装
   - [ ] テスト: MCPモジュールのテスト実装
 
-- [ ] **OpenAPI モジュール**
+- [x] **OpenAPI モジュール**
 
-  - [ ] `src/openapi/client.ts`: クライアント生成・管理の実装
-    - [ ] Config モジュールから取得したBASE_URLをOpenAPIClientの生成時に使用
-    - [ ] Config モジュールから取得したHEADERSをクライアント設定に適用
-  - [ ] `src/openapi/parser.ts`: スペック解析の実装
-  - [ ] `src/openapi/schema.ts`: スキーマ検証の実装
-  - [ ] テスト: OpenAPIモジュールのテスト実装
+  - [x] `src/openapi/client.ts`: クライアント生成・管理の実装
+    - [x] Config モジュールから取得したBASE_URLをOpenAPIClientの生成時に使用
+    - [x] Config モジュールから取得したHEADERSをクライアント設定に適用
+  - [x] `src/openapi/parser.ts`: スペック解析の実装
+    - [x] ファイルまたはURLからOpenAPIスペックを読み込み
+    - [x] スキーマの検証と正規化
+    - [x] operationIdが存在しない場合の自動生成機能
+  - [x] `src/openapi/schema.ts`: スキーマ検証の実装
+    - [x] スキーマのバリデーション機能
+    - [x] パラメータスキーマのZod形式への変換
+    - [x] operationIdの検証と代替ID生成
+  - [x] テスト: OpenAPIモジュールのテスト実装
+    - [x] `tests/openapi/schema.test.ts`: スキーマ関連機能のテスト
+    - [x] `tests/openapi/parser.test.ts`: パーサー関連機能のテスト
+    - [x] `tests/openapi/client.test.ts`: クライアント関連機能のテスト
 
 - [ ] **Tools モジュール**
 
   - [ ] `src/tools/builder.ts`: ツール生成ロジックの実装
+    - [ ] OpenAPIスキーマからMCPツールへの変換ロジック
     - [ ] Config モジュールとOpenAPIモジュールを連携させたMCPツール生成
   - [ ] `src/tools/executor.ts`: ツール実行処理の実装
     - [ ] リクエストURLの構築時にOpenAPIスペックのserversではなくConfig.baseUrlを使用
     - [ ] パラメータの適切な処理と検証
+    - [ ] ツールの実行結果のフォーマット処理
   - [ ] テスト: Toolsモジュールのテスト実装
 
 - [ ] **Utils モジュール**
@@ -108,7 +123,12 @@ src/
 ### 3. `mcp/`
 
 - `server.ts`: MCPサーバーの初期化と管理
+  - MCPサーバーのライフサイクル管理（初期化、接続、終了）
+  - ツール、リソース、プロンプトの登録インターフェース提供
+  - メッセージルーティングとハンドリング
 - `transport.ts`: 通信層の抽象化（StdioServerTransportなど）
+  - 異なる通信方式（stdio、HTTP/SSEなど）の抽象化
+  - クライアントとの双方向通信の実装
 
 ### 4. `openapi/`
 
@@ -121,10 +141,13 @@ src/
 ### 5. `tools/`
 
 - `builder.ts`: OpenAPIからMCPツールを生成するロジック
+  - OpenAPIのパス・オペレーション情報からMCPツール定義への変換
+  - スキーマからのパラメータ型定義と説明の抽出
   - 環境設定を考慮したツール生成
 - `executor.ts`: ツールの実行とレスポンス処理
   - 環境変数BASE_URLを使用したリクエストURL構築（OpenAPIのservers情報より優先）
   - パラメータ処理とリクエスト実行
+  - レスポンスのMCP形式への変換
 
 ### 6. `utils/`
 
@@ -513,3 +536,25 @@ export async function loadOpenApiSpec(specPath: string): Promise<any> {
   - OpenAPIスペックのservers情報より環境変数の設定を優先
 - **バージョン管理**: APIバージョンの管理と互換性の確保
 - **パフォーマンス最適化**: 必要に応じたキャッシングやその他の最適化手法の導入
+
+## モジュール間の依存関係
+
+### コア依存関係
+
+- **MCPモジュール**: 他のモジュールに依存せず独立して機能可能
+
+  - MCPの基本プロトコル実装を担当
+  - ツールの登録インターフェースを提供するが、具体的な実装には依存しない
+  - OpenAPIに関する知識を持たず、純粋にMCPプロトコルの実装に集中
+
+- **Toolsモジュール**: MCPモジュールとOpenAPIモジュールに依存
+
+  - OpenAPIスキーマをMCPツール形式に変換
+  - 変換したツールをMCPサーバーに登録
+  - ツール実行時のリクエスト構築と結果処理
+
+- **OpenAPIモジュール**: Configモジュールに依存
+  - 環境変数設定を使用したクライアント生成
+  - スペック解析とバリデーション
+
+この依存関係により、MCPモジュールは独立して使用できる一方で、Toolsモジュールは特定の役割（OpenAPI→MCP変換）を担い、システム全体を接続するブリッジとして機能します。
