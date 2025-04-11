@@ -17,19 +17,65 @@ beforeAll(() => {
 
 describe("OpenAPI Parser Module", () => {
   describe("loadOpenApiSpec", () => {
-    it("should load and parse a valid OpenAPI spec from file", async () => {
+    it("should load and parse a valid OpenAPI 3.1.0 spec from file", async () => {
+      // 3.1.0形式のモックテストファイルを作成
       const specPath = path.join(
         "tests",
         "openapi",
         "fixtures",
-        "simple-api.json",
+        "simple-api-3.1.0.json",
       );
+      const specContent = JSON.stringify({
+        openapi: "3.1.0",
+        info: { title: "Test API", version: "1.0.0" },
+        paths: {
+          "/users": {
+            get: { operationId: "getUsers" },
+          },
+        },
+      });
+      fs.writeFileSync(specPath, specContent);
+
       const schema = await loadOpenApiSpec(specPath);
 
       expect(schema).toBeDefined();
       expect(schema.info?.title).toBe("Test API");
-      expect(schema.info?.version).toBe("1.0.0");
-      expect(schema.paths).toBeDefined();
+      expect(schema.openapi).toBe("3.1.0");
+
+      // Type-safe access
+      const paths = schema.paths || {};
+      const usersPath = paths["/users"];
+      expect(usersPath).toBeDefined();
+
+      // Using as assertion for type safety
+      const getUsersOperation = usersPath?.get as OpenAPIV3_1.OperationObject;
+      expect(getUsersOperation?.operationId).toBe("getUsers");
+    });
+
+    it("should load and parse a valid OpenAPI 3.0.0 spec from file", async () => {
+      // 3.0.0形式のモックテストファイルを作成
+      const specPath = path.join(
+        "tests",
+        "openapi",
+        "fixtures",
+        "simple-api-3.0.0.json",
+      );
+      const specContent = JSON.stringify({
+        openapi: "3.0.0",
+        info: { title: "Test API 3.0", version: "1.0.0" },
+        paths: {
+          "/users": {
+            get: { operationId: "getUsers" },
+          },
+        },
+      });
+      fs.writeFileSync(specPath, specContent);
+
+      const schema = await loadOpenApiSpec(specPath);
+
+      expect(schema).toBeDefined();
+      expect(schema.info?.title).toBe("Test API 3.0");
+      expect(schema.openapi).toBe("3.0.0");
 
       // Type-safe access
       const paths = schema.paths || {};
@@ -139,7 +185,7 @@ describe("OpenAPI Parser Module", () => {
       await expect(loadOpenApiSpec("non-existent-file.json")).rejects.toThrow();
     });
 
-    it("should handle URL-based spec paths", async () => {
+    it("should handle URL-based spec paths with OpenAPI 3.1.0", async () => {
       // Mock fetch for URL-based spec
       const originalFetch = global.fetch;
 
@@ -167,6 +213,42 @@ describe("OpenAPI Parser Module", () => {
         );
         expect(schema).toBeDefined();
         expect(schema.info?.title).toBe("URL API");
+        expect(schema.openapi).toBe("3.1.0");
+      } finally {
+        // Restore fetch
+        global.fetch = originalFetch;
+      }
+    });
+
+    it("should handle URL-based spec paths with OpenAPI 3.0.0", async () => {
+      // Mock fetch for URL-based spec
+      const originalFetch = global.fetch;
+
+      // Type extension for Bun.mock
+      const mockedFetch = mock(
+        (url: string): Promise<Response> =>
+          Promise.resolve({
+            ok: true,
+            text: () =>
+              Promise.resolve(
+                JSON.stringify({
+                  openapi: "3.0.0",
+                  info: { title: "URL API 3.0", version: "1.0.0" },
+                  paths: {},
+                }),
+              ),
+          } as Response),
+      );
+
+      global.fetch = mockedFetch as unknown as typeof fetch;
+
+      try {
+        const schema = await loadOpenApiSpec(
+          "https://example.com/api-spec-3.0.json",
+        );
+        expect(schema).toBeDefined();
+        expect(schema.info?.title).toBe("URL API 3.0");
+        expect(schema.openapi).toBe("3.0.0");
       } finally {
         // Restore fetch
         global.fetch = originalFetch;

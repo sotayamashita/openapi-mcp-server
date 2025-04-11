@@ -1,0 +1,151 @@
+openapi: 3.0.0
+info:
+  title: Authentication Patterns API
+  description: APIの認証パターンをテストするためのOpenAPI 3.0.0スキーマ
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+
+# 認証定義
+components:
+  securitySchemes:
+    # Basic認証
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Basic認証（ユーザー名とパスワード）
+
+    # Bearer認証
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWTトークンを使用したBearer認証
+
+    # Digest認証（RFC 7235で定義された認証スキーム）
+    digestAuth:
+      type: http
+      scheme: digest
+      description: Digest認証
+
+    # ヘッダーでのAPIキー
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: ヘッダーでのAPIキー認証
+
+    # クエリパラメータでのAPIキー
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: api_key
+      description: クエリパラメータでのAPIキー認証
+
+    # CookieでのAPIキー
+    apiKeyCookie:
+      type: apiKey
+      in: cookie
+      name: SESSIONID
+      description: CookieでのAPIキー認証
+
+paths:
+  # Basic認証を使用するエンドポイント
+  /auth/basic:
+    get:
+      summary: Basic認証を使用するエンドポイント
+      security:
+        - basicAuth: []
+      responses:
+        "200":
+          description: 認証成功
+        "401":
+          description: 認証失敗
+
+  # Bearer認証を使用するエンドポイント
+  /auth/bearer:
+    get:
+      summary: Bearer認証を使用するエンドポイント
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 認証成功
+        "401":
+          description: 認証失敗
+
+  # Digest認証を使用するエンドポイント
+  /auth/digest:
+    get:
+      summary: Digest認証を使用するエンドポイント
+      security:
+        - digestAuth: []
+      responses:
+        "200":
+          description: 認証成功
+        "401":
+          description: 認証失敗
+
+  # APIキー（ヘッダー）を使用するエンドポイント
+  /auth/apikey/header:
+    get:
+      summary: ヘッダーでのAPIキーを使用するエンドポイント
+      security:
+        - apiKeyHeader: []
+      responses:
+        "200":
+          description: 認証成功
+        "401":
+          description: 認証失敗
+
+  # APIキー（クエリ）を使用するエンドポイント
+  /auth/apikey/query:
+    get:
+      summary: クエリパラメータでのAPIキーを使用するエンドポイント
+      security:
+        - apiKeyQuery: []
+      responses:
+        "200":
+          description: 認証成功
+        "401":
+          description: 認証失敗
+
+  # APIキー（Cookie）を使用するエンドポイント
+  /auth/apikey/cookie:
+    get:
+      summary: CookieでのAPIキーを使用するエンドポイント
+      security:
+        - apiKeyCookie: []
+      responses:
+        "200":
+          description: 認証成功
+        "401":
+          description: 認証失敗
+
+  # 複数の認証方式を組み合わせたエンドポイント（いずれか一つで認証可能）
+  /auth/multiple-options:
+    get:
+      summary: 複数の認証方式のいずれかを使用するエンドポイント
+      security:
+        - basicAuth: []
+        - bearerAuth: []
+        - apiKeyHeader: []
+      responses:
+        "200":
+          description: 認証成功
+        "401":
+          description: 認証失敗
+
+  # 複数の認証方式を組み合わせたエンドポイント（すべて必要）
+  /auth/combined:
+    get:
+      summary: 複数の認証方式をすべて組み合わせて使用するエンドポイント
+      security:
+        - bearerAuth: []
+          apiKeyHeader: []
+      responses:
+        "200":
+          description: 認証成功
+        "401":
+          description: 認証失敗
