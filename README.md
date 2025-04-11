@@ -32,31 +32,49 @@ bun run src/index.ts ./path/to/openapi.yml
 bun run src/index.ts --api https://example.com/api-spec.json
 ```
 
-### Integration with Claude Desktop
+## Configuration
 
-To use this MCP server with Claude Desktop, add it to your configuration:
+### Environment Variables
 
-```bash
-# macOS/Linux
-code ~/Library/Application\ Support/Claude/claude_desktop_config.json
-```
+- **`BASE_URL`**
 
-Add the following to your configuration:
+  - Required: Yes
+  - Description: API endpoint. [Server Object](https://swagger.io/specification#server-object)'s URL
 
-```json
-{
-  "mcpServer": {
-    "openapi-mcp-server": {
-      "command": "bun",
-      "args": [
-        "/path/to/openapi-mcp-server/src/index.ts",
-        // OpenAPI/Swagger spec URL or absolute file path
-        "/path/to/openapi-mcp-server/demo/openapi.yml"
-      ]
-    }
-  }
-}
-```
+- **`HEADERS`**
+  - Required: No
+  - Default: `{"Content-Type": "application/json","User-Agent": "openapi-mcp-server"}`
+  - Description: Custom headers that will overwrite default headers
+
+### Claude Desktop Integration
+
+To use this MCP server with Claude Desktop:
+
+1. Open your Claude Desktop configuration file:
+
+   ```bash
+   # macOS/Linux
+   code ~/Library/Application\ Support/Claude/claude_desktop_config.json
+   ```
+
+2. Add the following configuration:
+   ```json
+   {
+     "mcpServer": {
+       "openapi-mcp-server": {
+         "command": "bun",
+         "args": [
+           "/path/to/openapi-mcp-server/src/index.ts",
+           "/path/to/openapi-mcp-server/demo/openapi.yml"
+         ],
+         "env": {
+           "BASE_URL": "https://api.example.com/v1/",
+           "HEADERS": "{\"Authorization\": \"Bearer ****\"}"
+         }
+       }
+     }
+   }
+   ```
 
 For more detailed instructions, see the [MCP quickstart guide](https://modelcontextprotocol.io/quickstart/user).
 
