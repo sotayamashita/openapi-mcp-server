@@ -78,6 +78,34 @@ To use this MCP server with Claude Desktop:
 
 For more detailed instructions, see the [MCP quickstart guide](https://modelcontextprotocol.io/quickstart/user).
 
+### Cursor Integration
+
+To use this MCP server with Cursor as Global:
+
+1. Open Cursor
+2. Open Cursor Settings > MCP
+3. Click "+ Add new global MCP Server"
+4. Add the following configuration:
+   ```json
+   {
+     "mcpServer": {
+       "openapi-mcp-server": {
+         "command": "bun",
+         "args": [
+           "/path/to/openapi-mcp-server/src/index.ts",
+           "/path/to/openapi-mcp-server/demo/openapi.yml"
+         ],
+         "env": {
+           "BASE_URL": "https://api.example.com/v1/",
+           "HEADERS": "{\"Authorization\": \"Bearer ****\"}"
+         }
+       }
+     }
+   }
+   ```
+
+For more detailed instructions, see the [Cursor's Model Context Protocol](https://docs.cursor.com/context/model-context-protocol#mcp-resources).
+
 ## Development
 
 ### Development Commands
