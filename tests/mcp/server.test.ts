@@ -3,7 +3,7 @@ import { McpServer } from "../../src/mcp";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-// モックMCPサーバー
+// Mock MCP server
 mock.module("@modelcontextprotocol/sdk/server/mcp.js", () => {
   return {
     McpServer: class MockMcpServer {
@@ -28,7 +28,7 @@ mock.module("@modelcontextprotocol/sdk/server/mcp.js", () => {
   };
 });
 
-// モックトランスポート
+// Mock transport
 const mockTransport = {
   onMessage: () => {},
   send: () => {},
@@ -42,7 +42,7 @@ describe("MCP Server Module", () => {
         version: "1.0.0",
       });
 
-      // サーバーが作成されたことを確認
+      // Verify server is created
       expect(server).toBeDefined();
     });
 
@@ -52,7 +52,7 @@ describe("MCP Server Module", () => {
         version: "1.0.0",
       });
 
-      // ツール実行関数
+      // Tool execution function
       const toolHandler = async (params: any) => {
         return {
           content: [
@@ -64,13 +64,13 @@ describe("MCP Server Module", () => {
         };
       };
 
-      // Zodスキーマ
+      // Zod schema
       const paramSchema = {
         name: z.string(),
         id: z.number().optional(),
       };
 
-      // ツールを登録
+      // Register tool
       const result = server.tool(
         "testTool",
         "Test tool description",
@@ -78,7 +78,7 @@ describe("MCP Server Module", () => {
         toolHandler,
       );
 
-      // メソッドチェーニングのためにthisを返すことを確認
+      // Verify method chaining returns this
       expect(result).toBe(server);
     });
 
@@ -88,18 +88,18 @@ describe("MCP Server Module", () => {
         version: "1.0.0",
       });
 
-      // connect関数をスパイ
+      // Spy on connect function
       const connectSpy = spyOn(server as any, "connect").mockImplementation(
         () => Promise.resolve(),
       );
 
       await server.connect(mockTransport);
 
-      // connect関数が呼ばれたことを確認
+      // Verify connect was called
       expect(connectSpy).toHaveBeenCalled();
       expect(connectSpy).toHaveBeenCalledWith(mockTransport);
 
-      // モックを元に戻す
+      // Restore mock
       connectSpy.mockRestore();
     });
 
@@ -109,10 +109,10 @@ describe("MCP Server Module", () => {
         version: "1.0.0",
       });
 
-      // 結果を記録するための変数
+      // Variable to record execution result
       let executionResult: any = null;
 
-      // ツール実行関数
+      // Tool execution function
       const toolHandler = async (params: { name: string; id?: number }) => {
         return {
           content: [
@@ -124,7 +124,7 @@ describe("MCP Server Module", () => {
         };
       };
 
-      // ツールを登録
+      // Register tool
       server.tool(
         "greet",
         "Greeting tool",
@@ -135,17 +135,17 @@ describe("MCP Server Module", () => {
         toolHandler,
       );
 
-      // モックサーバーからツールハンドラを取得
+      // Get tool handler from mock server
       const mockServer = (server as any).server;
       const registeredTool = mockServer.tools.get("greet");
 
       expect(registeredTool).toBeDefined();
       expect(registeredTool.description).toBe("Greeting tool");
 
-      // ツールハンドラを実行
+      // Execute tool handler
       const result = await registeredTool.handler({ name: "Test User" });
 
-      // 結果を確認
+      // Verify result
       expect(result).toBeDefined();
       expect(result.content).toBeArrayOfSize(1);
       expect(result.content[0].type).toBe("text");

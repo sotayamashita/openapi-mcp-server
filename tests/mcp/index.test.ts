@@ -22,7 +22,7 @@ describe("MCP Module Integration", () => {
         version: "1.0.0",
       });
 
-      // 必要なメソッドがあるか確認
+      // Check if required methods exist
       expect(server.tool).toBeDefined();
       expect(typeof server.tool).toBe("function");
       expect(server.connect).toBeDefined();
@@ -35,7 +35,7 @@ describe("MCP Module Integration", () => {
         version: "1.0.0",
       });
 
-      // tool メソッドがメソッドチェーニングのためにインスタンス自身を返すか確認
+      // Check if tool method returns instance for method chaining
       const result = server.tool(
         "test",
         "test description",
