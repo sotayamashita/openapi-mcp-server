@@ -6,8 +6,33 @@ The openapi-mcp-server is a powerful bridge between OpenAPI specifications and A
 
 ## Features
 
-🔌 **OpenAPI Integration** - Automatically converts OpenAPI/Swagger specifications into MCP tools  
-🧩 **Parameter Validation** - Automatically validates API parameters using Zod
+🔌 **OpenAPI Integration**
+
+- Automatically converts OpenAPI/Swagger specifications into MCP tools  
+  🧩 **Parameter Validation**
+- Automatically validates API parameters using Zod  
+  📚 **Multiple OpenAPI Versions**
+- Support for OpenAPI v3.0.0 and v3.1.0  
+  🔐 **Authentication Support**:
+- HTTP authentication schemes:
+  - Basic authentication
+  - Bearer token authentication (JWT)
+  - Other HTTP schemes as defined by [RFC 7235](https://tools.ietf.org/html/rfc7235)
+- API keys:
+  - Header-based API keys
+  - Query parameter-based API keys
+  - Cookie-based authentication
+
+## Limitations
+
+⚠️ **Version Support**:
+
+- [ ] OpenAPI v2.0 (Swagger) is not currently supported
+
+⚠️ **Authentication Limitations**:
+
+- [ ] OAuth 2.0 authentication is not supported
+- [ ] OpenID Connect Discovery is not supported
 
 ## Installation
 
