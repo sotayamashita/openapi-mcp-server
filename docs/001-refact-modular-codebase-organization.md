@@ -1,251 +1,249 @@
 # 001-refact-modular-codebase-organization
 
-## 概要
+## Overview.
 
-このリファクタリング計画は、`openapi-mcp-server`のコードベースを再構成し、より堅牢で保守しやすく、テスト可能なアーキテクチャを構築することを目的としています。現在の単一ファイル（`src/index.ts`）は複数の責務を持っており、これを機能ごとに適切に分割することで、コードの可読性と保守性を向上させます。
+The purpose of this refactoring plan is to reorganize the `openapi-mcp-server` codebase to create a more robust, maintainable, and testable architecture. The current single file ([`src/index.ts`](https://github.com/sotayamashita/openapi-mcp-server/blob/0b085927942bbdbba97ac5a266798ad5c811a80d/src/index.ts)) has multiple responsibilities, which will be broken down appropriately by function to improve code readability and maintainability.
 
-## 目的
+## Purpose
 
-1. **責務の明確な分離**: 各モジュールが単一の責任を持つように設計
-2. **コードの再利用性向上**: 重複コードを排除し、適切な抽象化を通じて再利用性を高める
-3. **テスト容易性の向上**: 各モジュールが独立してテスト可能な構造に
-4. **エラーハンドリングの強化**: 堅牢なエラー処理とバリデーションの実装
-5. **拡張性の向上**: 将来の機能追加や変更が容易な構造の実現
+1. **Clear separation of responsibilities**: design each module to have a single responsibility 2.**Improve code reusability**: Eliminate duplicate code and increase reusability through appropriate abstraction
+2. **Increased testability**: structure each module to be independently testable 4.**Error Handling Enhancements**: Implement robust error handling and validation 5.**Increased extensibility**: structure allows for easy addition and modification of future functionality
 
-## 実装状況
+## Implementation Status
 
-- [x] **CLI モジュール**
+- [x] **CLI Module**.
 
-  - [x] `src/cli/args.ts`: コマンドライン引数処理の実装
-  - [x] `src/cli/index.ts`: CLIエントリーポイントの実装
-  - [x] テスト: `tests/cli/args.test.ts`の実装
-  - [x] `src/index.ts`からCLIモジュールの利用
+  - [x] `src/cli/args.ts`: Implement command line argument handling.
+  - [x] `src/cli/index.ts`: implementation of CLI entry points
+  - [x] Tests: `tests/cli/args.test.ts` implementation
+  - [x] Using CLI modules from `src/index.ts`.
 
-- [x] **Config モジュール**
+- [x] **Config module**.
 
-  - [x] `src/config/index.ts`: 設定管理の実装
-    - [x] 環境変数（BASE_URL, HEADERS）の読み込みと検証
-    - [x] 環境変数BASE_URLを必須とし、OpenAPIスペックのservers情報に関わらず常に使用する設計
-    - [x] HEADERSのJSON解析と適切なデフォルト値の提供
-  - [x] テスト: `tests/config/index.test.ts`の実装
-    - [x] 様々な環境変数パターンでのテストケース
-    - [x] エラーケースのテスト
+  - [x] `src/config/index.ts`: implementation of configuration management
+    - [x] Reading and validating environment variables (BASE_URL, HEADERS)
+    - [x] Design to require the BASE_URL environment variable and always use it regardless of the servers information in the OpenAPI spec.
+    - [x] JSON parsing of HEADERS and provision of appropriate default values.
+  - [x] Testing: implementation of `tests/config/index.test.ts`.
+    - [x] Test cases with various environment variable patterns
+    - [x] Test error cases.
 
-- [x] **MCP モジュール**
+- [x] **MCP Module**.
 
-  - [x] `src/mcp/server.ts`: MCPサーバーコア機能の実装
-    - [x] MCPサーバーの初期化と設定
-    - [x] クライアントとの接続管理
-    - [x] ツール登録と実行
-    - [x] プロトコル準拠の保証
-  - [x] `src/mcp/transport.ts`: トランスポート層の実装
-  - [x] `src/mcp/index.ts`: モジュールのエクスポート設定
-  - [x] テスト: MCPモジュールのテスト実装
-    - [x] `tests/mcp/server.test.ts`: サーバー機能のテスト
-    - [x] `tests/mcp/transport.test.ts`: トランスポートのテスト
-    - [x] `tests/mcp/index.test.ts`: モジュール統合テスト
+  - [x] `src/mcp/server.ts`: implementation of MCP server core functionality
+    - [x] Initialize and configure the MCP server.
+    - [x] Client Connection Management
+    - [x] Tool registration and execution
+    - [x] Ensure protocol compliance.
+  - [x] `src/mcp/transport.ts`: Transport layer implementation.
+  - [x] `src/mcp/index.ts`: Module export configuration
+  - [x] tests: test implementation for MCP modules.
+    - [x] `tests/mcp/server.test.ts`: Test server functions.
+    - [x] `tests/mcp/transport.test.ts`: Test transport.
+    - [x] `tests/mcp/index.test.ts`: Module integration tests
 
-- [x] **OpenAPI モジュール**
+- [x] **OpenAPI module**.
 
-  - [x] `src/openapi/client.ts`: クライアント生成・管理の実装
-    - [x] Config モジュールから取得したBASE_URLをOpenAPIClientの生成時に使用
-    - [x] Config モジュールから取得したHEADERSをクライアント設定に適用
-  - [x] `src/openapi/parser.ts`: スペック解析の実装
-    - [x] ファイルまたはURLからOpenAPIスペックを読み込み
-    - [x] スキーマの検証と正規化
-    - [x] operationIdが存在しない場合の自動生成機能
-  - [x] `src/openapi/schema.ts`: スキーマ検証の実装
-    - [x] スキーマのバリデーション機能
-    - [x] パラメータスキーマのZod形式への変換
-    - [x] operationIdの検証と代替ID生成
-  - [x] テスト: OpenAPIモジュールのテスト実装
-    - [x] `tests/openapi/schema.test.ts`: スキーマ関連機能のテスト
-    - [x] `tests/openapi/parser.test.ts`: パーサー関連機能のテスト
-    - [x] `tests/openapi/client.test.ts`: クライアント関連機能のテスト
+  - [x] `src/openapi/client.ts`: implementation of client creation and management
+    - [x] BASE_URL obtained from Config module is used when generating OpenAPIClient.
+    - [x] Apply HEADERS retrieved from Config module to client configuration.
+  - [x] `src/openapi/parser.ts`: implementation of spec parsing
+    - [x] Read OpenAPI specs from a file or URL.
+    - [x] Schema validation and normalization.
+    - [x] Automatic generation of operationId if it does not exist.
+  - [x] `src/openapi/schema.ts`: implementation of schema validation
+    - [x] Schema validation functionality.
+    - [x] Conversion of parameter schema to Zod format.
+    - [x] operationId validation and alternate ID generation
+  - [x] Testing: Test implementation for OpenAPI modules.
+    - [x] `tests/openapi/schema.test.ts`: test schema-related functions.
+    - [x] `tests/openapi/parser.test.ts`: Test for parser-related functions.
+    - [x] `tests/openapi/client.test.ts`: Test client-related functions.
 
-- [x] **Tools モジュール**
+- [x] **Tools module**.
 
-  - [x] `src/tools/builder.ts`: ツール生成ロジックの実装
-    - [x] OpenAPIスキーマからMCPツールへの変換ロジック
-    - [x] Config モジュールとOpenAPIモジュールを連携させたMCPツール生成
-  - [x] `src/tools/executor.ts`: ツール実行処理の実装
-    - [x] リクエストURLの構築時にOpenAPIスペックのserversではなくConfig.baseUrlを使用
-    - [x] パラメータの適切な処理と検証
-    - [x] ツールの実行結果のフォーマット処理
-  - [x] テスト: Toolsモジュールのテスト実装
-    - [x] `tests/tools/builder.test.ts`: ツール生成機能のテスト
-    - [x] `tests/tools/executor.test.ts`: ツール実行機能のテスト
+  - [x] `src/tools/builder.ts`: implement tool generation logic.
+    - [x] Conversion logic from OpenAPI schema to MCP tools.
+    - [x] MCP tool generation linking Config module and OpenAPI module.
+  - [x] `src/tools/executor.ts`: implementation of the tool execution process.
+    - [x] Use Config.baseUrl instead of OpenAPI spec servers when constructing request URLs.
+    - [x] Proper handling and validation of parameters.
+    - [x] Formatting of tool execution results.
+  - [x] Testing: Test implementation of the Tools module.
+    - [x] `tests/tools/builder.test.ts`: Test tool generation functionality.
+    - [x] `tests/tools/executor.test.ts`: Testing the tool execution functionality.
 
-- [ ] **Utils モジュール**
+- [ ] ~~**Utils module**~~.
 
-  - [ ] `src/utils/http.ts`: HTTP関連ユーティリティの実装
-  - [ ] `src/utils/validation.ts`: バリデーションヘルパーの実装
-  - [ ] テスト: Utilsモジュールのテスト実装
+  - [ ] ~~`src/utils/http.ts`: implementation of HTTP related utilities~~.
+  - [ ] ~~`src/utils/validation.ts`: implementation of validation helpers~~
+  - [ ] ~~Test: Test implementation of the Utils module~~.
+  - [x] Not necessary to implement at this stage.
 
-- [x] **Types モジュール**
-  - [x] `src/types/index.ts`: 共通型定義の実装
-    - [x] ツール関連の型定義（ToolExecutor、ToolResponse、ToolContentItem）
-    - [x] OpenAPI関連の型定義（Parameter、Operation）
-    - [x] MCP SDKとの型互換性の確保
+- [x] **Types module**.
+  - [x] `src/types/index.ts`: implementation of common type definitions
+    - [x] Tool-related type definitions (ToolExecutor, ToolResponse, ToolContentItem)
+    - [x] OpenAPI related type definitions (Parameter, Operation)
+    - [x] Ensure type compatibility with MCP SDK
 
-## 提案するディレクトリ構造
+## Proposed directory structure.
 
 ```
 src/
 ├── cli/
-│   ├── args.ts       # コマンドライン引数の処理
-│   └── index.ts      # CLIエントリーポイント
+│   ├── args.ts       # Handling of command line arguments
+│   └── index.ts      # CLI entry points
 ├── config/
-│   └── index.ts      # 設定管理（環境変数など）
+│   └── index.ts      # Configuration management (environment variables, etc.)
 ├── mcp/
-│   ├── server.ts     # MCPサーバーのコア機能
-│   └── transport.ts  # トランスポート層の抽象化
+│   ├── server.ts     # Core MCP server functions
+│   └── transport.ts  # Transport layer abstraction
 ├── openapi/
-│   ├── client.ts     # OpenAPI クライアント生成と管理
-│   ├── parser.ts     # OpenAPI スペックの解析
-│   └── schema.ts     # スキーマ検証とパース
+│   ├── client.ts     # OpenAPI client generation and management
+│   ├── parser.ts     # Parsing OpenAPI specs
+│   └── schema.ts     # Schema verification and parsing
 ├── tools/
-│   ├── builder.ts    # MCP ツール生成ロジック
-│   └── executor.ts   # ツール実行と結果ハンドリング
+│   ├── builder.ts    # MCP tool generation logic
+│   └── executor.ts   # Tool execution and result handling
 ├── utils/
-│   ├── http.ts       # HTTP関連ユーティリティ
-│   └── validation.ts # バリデーションヘルパー
+│   ├── http.ts       # HTTP related utilities
+│   └── validation.ts # Validation helper
 ├── types/
-│   └── index.ts      # 型定義
-└── index.ts           # アプリケーションのエントリーポイント
+│   └── index.ts      # type definitions
+└── index.ts           # application entry points
 ```
 
-## 各ディレクトリの責務
+## Responsibilities for each directory
 
 ### 1. `cli/`
 
-- `args.ts`: コマンドライン引数の処理、パースと検証
-- `index.ts`: CLIのエントリーポイント、ユーザー入力と出力の管理
+- `args.ts`: Process, parse and validate command line arguments
+- `index.ts`: CLI entry point, manage user input and output ### 2.
 
 ### 2. `config/`
 
-- `index.ts`: 環境変数の読み込みと設定の管理
-  - BASE_URL: API エンドポイントの指定（必須）
-  - HEADERS: カスタムHTTPヘッダーの指定（オプション、JSON形式）
-  - 設定のバリデーションとデフォルト値の提供
+- `index.ts`: read environment variables and manage settings
+  - BASE_URL: Specify API endpoint (required)
+  - HEADERS: Specify custom HTTP headers (optional, in JSON format)
+  - Configuration validation and provision of default values
 
-### 3. `mcp/`
+### 3. `mcp/`.
 
-- `server.ts`: MCPサーバーの初期化と管理
-  - MCPサーバーのライフサイクル管理（初期化、接続、終了）
-  - ツール、リソース、プロンプトの登録インターフェース提供
-  - メッセージルーティングとハンドリング
-- `transport.ts`: 通信層の抽象化（StdioServerTransportなど）
-  - 異なる通信方式（stdio、HTTP/SSEなど）の抽象化
-  - クライアントとの双方向通信の実装
+- `server.ts`: initialize and manage MCP servers
+  - Lifecycle management of MCP servers (initialization, connection, termination)
+  - Provide registration interface for tools, resources, and prompts
+  - Message routing and handling
+- `transport.ts`: Communication layer abstraction (e.g. StdioServerTransport)
+  - Abstraction of different communication methods (stdio, HTTP/SSE, etc.)
+  - Implementation of bi-directional communication with clients.
 
 ### 4. `openapi/`
 
-- `client.ts`: OpenAPIクライアントの生成と管理
-  - 環境変数BASE_URLを使用したクライアント設定
-  - 環境変数HEADERSを使用したカスタムヘッダー設定
-- `parser.ts`: OpenAPIスペックの解析とデリファレンス
-- `schema.ts`: スキーマのバリデーションと変換
+- `client.ts`: Create and manage OpenAPI clients
+  - Client configuration using the BASE_URL environment variable
+  - Custom header configuration using the HEADERS environment variable
+- `parser.ts`: Parsing and dereferencing OpenAPI specs
+- `schema.ts`: schema validation and conversion
 
 ### 5. `tools/`
 
-- `builder.ts`: OpenAPIからMCPツールを生成するロジック
-  - OpenAPIのパス・オペレーション情報からMCPツール定義への変換
-  - スキーマからのパラメータ型定義と説明の抽出
-  - 環境設定を考慮したツール生成
-- `executor.ts`: ツールの実行とレスポンス処理
-  - 環境変数BASE_URLを使用したリクエストURL構築（OpenAPIのservers情報より優先）
-  - パラメータ処理とリクエスト実行
-  - レスポンスのMCP形式への変換
+- `builder.ts`: Logic to generate MCP tools from OpenAPI
+  - Conversion from OpenAPI path and operation information to MCP tool definitions
+  - Extraction of parameter type definitions and descriptions from schema
+  - Tool generation considering environment settings
+- `executor.ts`: Tool execution and response processing
+  - Request URL construction using BASE_URL environment variable (takes precedence over OpenAPI servers information)
+  - Parameter processing and request execution
+  - Response conversion to MCP format
 
-### 6. `utils/`
+### 6.
 
-- `http.ts`: HTTP関連のユーティリティ関数
-- `validation.ts`: 入力検証ヘルパー
+- `http.ts`: HTTP related utility functions
+- `validation.ts`: input validation helpers ### 7.
 
 ### 7. `types/`
 
-- `index.ts`: 共通の型定義
+- `index.ts`: common type definitions ### 8.
 
-## 具体的なリファクタリング方針
+## Specific refactoring policy
 
-### 1. Single Responsibility Principle (SRP)
+### Single Responsibility Principle (SRP)
 
-- 現在の単一ファイルを機能ごとに分割
-- 各モジュールは単一の責務を持つように設計
-- コード間の依存関係を明確にし、循環依存を排除
+- Split the current single file by function
+- Design each module to have a single responsibility
+- Clarify dependencies between code and eliminate circular dependencies
 
 ### 2. DRY (Don't Repeat Yourself)
 
-- リクエスト構築ロジックを共通ユーティリティに抽出
-- パラメータ処理を再利用可能な関数に整理
-- 重複するバリデーションロジックの共通化
+- Extract request construction logic into common utilities
+- Organize parameter processing into reusable functions
+- Commonize overlapping validation logic ### 4.
 
 ### 4. Separation of Concerns (SoC)
 
-- CLIロジックとサーバーロジックの分離
-- OpenAPI処理とMCPツール生成の分離
-- 設定管理と実行ロジックの分離
+- Separation of CLI logic from server logic
+- Separation of OpenAPI processing and MCP tool generation
+- Separation of configuration management and execution logic
 
-### 5. Defensive Programming
+### Defensive Programming
 
-- OpenApiSpecPathのnull/undefined検証
-- APIレスポンスの適切なエラーハンドリング
-- バリデーションとエラーメッセージの強化
+- OpenApiSpecPath null/undefined validation
+- Proper error handling of API responses
+- Enhanced validation and error messages
 
-## 実装計画
+## Implementation Plan
 
-1. **フェーズ1**: 基本的なディレクトリ構造の作成と既存コードの分割
+1. **Phase 1**: Create basic directory structure and split existing code
 
-   - ディレクトリ構造のセットアップ
-   - MCPモジュールの実装
-   - 基本的なテストの追加
+   - Setup directory structure
+   - Implement MCP module
+   - Add basic tests 2.
 
-2. **フェーズ2**: エラーハンドリングと型安全性の強化
+2. **Phase 2**: Enhance error handling and type safety
 
-   - バリデーションの強化
-   - エラーハンドリングの改善
-   - 型定義の整備
+   - Strengthen validation
+   - Improve error handling
+   - Improve type definitions 3.
 
-3. **フェーズ3**: テストカバレッジの向上とドキュメント整備
-   - ユニットテストの拡充
-   - 統合テストの追加
-   - ドキュメントの更新
+3. **Phase 3**: Improve test coverage and documentation
+   - Expand unit testing
+   - Add integration tests
+   - Update documentation
 
-## 期待される効果
+## Expected Benefits
 
-- **保守性の向上**: 明確に分離された責務により、コードの理解と修正が容易に
-- **品質の向上**: テストカバレッジの増加によるバグの減少
-- **拡張性の向上**: 新機能の追加が容易に
-- **開発効率の向上**: モジュール単位での開発とテストが可能に
-- **チームでの開発効率**: コードの責務が明確になることで、並行開発が容易に
+- **Improved Maintainability**: Clearly separated responsibilities make code easier to understand and modify.
+- **Improved Quality**: Fewer bugs due to increased test coverage
+- **Increased extensibility**: Easier to add new features
+- **Increased development efficiency**: Modules can be developed and tested at a module-by-module level
+- **Team development efficiency**: clearer code responsibility facilitates parallel development
 
-## 追加の考慮事項
+## Additional considerations
 
-- **依存性注入**: 柔軟なテストとモック化のための依存性注入パターンの活用
-- **ログ機能の強化**: 適切なログレベルとフォーマットの導入
-- **設定の柔軟化**: 環境変数や設定ファイルによる設定の外部化
-  - BASE_URLとHEADERSの適切な取り扱い
-  - OpenAPIスペックのservers情報より環境変数の設定を優先
-- **バージョン管理**: APIバージョンの管理と互換性の確保
-- **パフォーマンス最適化**: 必要に応じたキャッシングやその他の最適化手法の導入
+- **Dependency Injection**: Utilize dependency injection patterns for flexible testing and mocking
+- **Logging Enhancements**: Implement appropriate log levels and formats
+- **Configuration Flexibility**: Externalize configuration via environment variables and configuration files
+  - Proper handling of BASE_URL and HEADERS
+  - Prioritize environment variable settings over servers information in OpenAPI specs
+- Version control\*\*: API version control and compatibility
+- **Performance Optimization**: Implement caching and other optimization techniques as needed
 
-## モジュール間の依存関係
+## Inter-module dependencies
 
-### コア依存関係
+### Core dependencies
 
-- **MCPモジュール**: 他のモジュールに依存せず独立して機能可能
+- **MCP module**: can function independently of other modules
 
-  - MCPの基本プロトコル実装を担当
-  - ツールの登録インターフェースを提供するが、具体的な実装には依存しない
-  - OpenAPIに関する知識を持たず、純粋にMCPプロトコルの実装に集中
+  - Responsible for basic protocol implementation of MCP
+  - Provides tool registration interface, but does not depend on specific implementations
+  - Focuses purely on MCP protocol implementation, with no knowledge of OpenAPI
 
-- **Toolsモジュール**: MCPモジュールとOpenAPIモジュールに依存
+- **Tools module**: depends on MCP and OpenAPI modules
 
-  - OpenAPIスキーマをMCPツール形式に変換
-  - 変換したツールをMCPサーバーに登録
-  - ツール実行時のリクエスト構築と結果処理
+  - Convert OpenAPI schema to MCP tools format
+  - Register converted tools with MCP server
+  - Build requests and process results when tools are executed
 
-- **OpenAPIモジュール**: Configモジュールに依存
-  - 環境変数設定を使用したクライアント生成
-  - スペック解析とバリデーション
+- **OpenAPI module**: depends on Config module
+  - Client generation using environment variable settings
+  - Spec analysis and validation
