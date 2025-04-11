@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// XML オブジェクトスキーマ定義
+// XML object schema definition
 export const XmlSchema = z.object({
   name: z.string().optional(),
   namespace: z.string().optional(),

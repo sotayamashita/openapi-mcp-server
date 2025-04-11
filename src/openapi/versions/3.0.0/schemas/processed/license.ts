@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// License オブジェクトスキーマ定義
+// License object schema definition
 export const LicenseSchema = z.object({
   name: z.string(),
   url: z.string().url().optional(),

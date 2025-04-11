@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Contact オブジェクトスキーマ定義
+// Contact object schema definition
 export const ContactSchema = z.object({
   name: z.string().optional(),
   url: z.string().url().optional(),

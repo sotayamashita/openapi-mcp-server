@@ -10,7 +10,7 @@ import { LinkSchema } from "./link";
 import { CallbackSchema } from "./callback";
 import { referenceOr } from "./reference";
 
-// Components オブジェクトスキーマ定義
+// Components object schema definition
 export const ComponentsSchema = z.object({
   schemas: z.record(z.string(), SchemaObjectSchema).optional(),
   responses: z.record(z.string(), referenceOr(ResponseSchema)).optional(),

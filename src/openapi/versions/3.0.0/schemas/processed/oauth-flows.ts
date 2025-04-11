@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// OAuth Flow オブジェクト
+// OAuth Flow object schema definition
 const OAuthFlowSchema = z.object({
   authorizationUrl: z.string().url().optional(),
   tokenUrl: z.string().url().optional(),
@@ -8,7 +8,7 @@ const OAuthFlowSchema = z.object({
   scopes: z.record(z.string(), z.string()),
 });
 
-// OAuth Flows オブジェクトスキーマ定義
+// OAuth Flows object schema definition
 export const OAuthFlowsSchema = z.object({
   implicit: OAuthFlowSchema.extend({
     authorizationUrl: z.string().url(),

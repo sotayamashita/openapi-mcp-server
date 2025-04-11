@@ -4,10 +4,10 @@ import { referenceOr } from "./reference";
 import { ExampleSchema } from "./example";
 import { MediaTypeSchema } from "./media-type";
 
-// パラメータの場所を定義
+// Define parameter location
 const parameterInEnum = z.enum(["query", "header", "path", "cookie"]);
 
-// パラメータのスタイル定義
+// Define parameter style
 const styleEnum = z.enum([
   "matrix",
   "label",
@@ -18,7 +18,7 @@ const styleEnum = z.enum([
   "deepObject",
 ]);
 
-// Parameter オブジェクトスキーマ定義
+// Parameter object schema definition
 export const ParameterSchema = z.object({
   name: z.string(),
   in: parameterInEnum,
@@ -27,7 +27,7 @@ export const ParameterSchema = z.object({
   deprecated: z.boolean().optional(),
   allowEmptyValue: z.boolean().optional(),
 
-  // スタイルオプション
+  // Style options
   style: styleEnum.optional(),
   explode: z.boolean().optional(),
   allowReserved: z.boolean().optional(),
@@ -35,7 +35,7 @@ export const ParameterSchema = z.object({
   example: z.any().optional(),
   examples: z.record(z.string(), referenceOr(ExampleSchema)).optional(),
 
-  // リッチなコンテンツ
+  // Rich content
   content: z.record(z.string(), MediaTypeSchema).optional(),
 });
 

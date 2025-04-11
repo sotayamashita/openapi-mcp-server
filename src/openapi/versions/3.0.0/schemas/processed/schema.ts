@@ -4,7 +4,7 @@ import { ExternalDocumentationSchema } from "./external-documentation";
 import { DiscriminatorSchema } from "./discriminator";
 import { XmlSchema } from "./xml";
 
-// JSON Schema型のリテラル
+// JSON Schema type literals
 const typeEnum = z.enum([
   "array",
   "boolean",
@@ -14,7 +14,7 @@ const typeEnum = z.enum([
   "string",
 ]);
 
-// 再帰的なスキーマ定義のための前方宣言
+// Forward declaration for recursive schema definition
 const SchemaObjectSchema: z.ZodType<any> = z.lazy(() => {
   return z.object({
     // Schema Core vocabulary
@@ -64,7 +64,7 @@ const SchemaObjectSchema: z.ZodType<any> = z.lazy(() => {
       .optional(),
 
     // OpenAPI specific fields
-    nullable: z.boolean().optional(), // OpenAPI 3.0.0固有のフィールド
+    nullable: z.boolean().optional(), // OpenAPI 3.0.0 specific field
     discriminator: DiscriminatorSchema.optional(),
     xml: XmlSchema.optional(),
     externalDocs: ExternalDocumentationSchema.optional(),

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ServerVariableSchema } from "./server-variable";
 
-// Server オブジェクトスキーマ定義
+// Server object schema definition
 export const ServerSchema = z.object({
   url: z.string(),
   description: z.string().optional(),

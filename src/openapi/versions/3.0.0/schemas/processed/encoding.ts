@@ -2,7 +2,7 @@ import { z } from "zod";
 import { HeaderSchema } from "./header";
 import { referenceOr } from "./reference";
 
-// Encoding オブジェクトスキーマ定義
+// Encoding object schema definition
 export const EncodingSchema = z.object({
   contentType: z.string().optional(),
   headers: z.record(z.string(), referenceOr(HeaderSchema)).optional(),

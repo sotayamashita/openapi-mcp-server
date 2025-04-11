@@ -3,7 +3,7 @@ import { SchemaObjectSchema } from "./schema";
 import { referenceOr } from "./reference";
 import { ExampleSchema } from "./example";
 
-// ヘッダー内のコンテンツスタイル定義
+// Content style definition within header
 const styleEnum = z.enum([
   "simple",
   "matrix",
@@ -14,7 +14,7 @@ const styleEnum = z.enum([
   "deepObject",
 ]);
 
-// Header オブジェクトスキーマ定義
+// Header object schema definition
 export const HeaderSchema = z.object({
   description: z.string().optional(),
   required: z.boolean().optional(),
@@ -28,7 +28,7 @@ export const HeaderSchema = z.object({
   example: z.any().optional(),
   examples: z.record(z.string(), referenceOr(ExampleSchema)).optional(),
 
-  // この属性はヘッダー定義に含まれるべきでない
+  // These attributes should not be included in header definition
   name: z.string().optional(),
   in: z.string().optional(),
 });

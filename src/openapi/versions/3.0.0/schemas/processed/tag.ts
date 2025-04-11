@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ExternalDocumentationSchema } from "./external-documentation";
 
-// Tag オブジェクトスキーマ定義
+// Tag object schema definition
 export const TagSchema = z.object({
   name: z.string(),
   description: z.string().optional(),

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ServerSchema } from "./server";
 
-// Link オブジェクトスキーマ定義
+// Link object schema definition
 export const LinkSchema = z.object({
   operationRef: z.string().optional(),
   operationId: z.string().optional(),

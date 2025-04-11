@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// ExternalDocumentation オブジェクトスキーマ定義
+// ExternalDocumentation object schema definition
 export const ExternalDocumentationSchema = z.object({
   url: z.string().url(),
   description: z.string().optional(),

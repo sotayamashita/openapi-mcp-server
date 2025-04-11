@@ -34,7 +34,7 @@
 1. OpenAPI 3.0.0 の JSON Schema を確認して、以下の観点で OpenAPI `v3.1.0` の JSON Schema と差分を記録 ✅
    - Read: docs/openapi/versions/3.0.0/json-schema-diff-analysis.md
 
-## 4. OpenAPI 3.0.0 実装計画確立
+## 4. OpenAPI 3.0.0 実装計画確立 ✅
 
 Read: docs/codebase-structure.md
 

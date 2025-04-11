@@ -4,7 +4,7 @@ import { HeaderSchema } from "./header";
 import { referenceOr } from "./reference";
 import { LinkSchema } from "./link";
 
-// Response オブジェクトスキーマ定義
+// Response object schema definition
 export const ResponseSchema = z.object({
   description: z.string(),
   headers: z.record(z.string(), referenceOr(HeaderSchema)).optional(),

@@ -4,13 +4,13 @@ import { ParameterSchema } from "./parameter";
 import { ServerSchema } from "./server";
 import { referenceOr } from "./reference";
 
-// PathItem オブジェクトスキーマ定義
+// PathItem object schema definition
 export const PathItemSchema = z.object({
-  // 基本情報
+  // Basic information
   summary: z.string().optional(),
   description: z.string().optional(),
 
-  // HTTP メソッド
+  // HTTP methods
   get: OperationSchema.optional(),
   put: OperationSchema.optional(),
   post: OperationSchema.optional(),
@@ -20,7 +20,7 @@ export const PathItemSchema = z.object({
   patch: OperationSchema.optional(),
   trace: OperationSchema.optional(),
 
-  // 共通パラメータとサーバー
+  // Common parameters and servers
   servers: z.array(ServerSchema).optional(),
   parameters: z.array(referenceOr(ParameterSchema)).optional(),
 });

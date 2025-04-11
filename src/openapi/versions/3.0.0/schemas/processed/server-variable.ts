@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// ServerVariable オブジェクトスキーマ定義
+// ServerVariable object schema definition
 export const ServerVariableSchema = z.object({
   enum: z.array(z.string()).optional(),
   default: z.string(),

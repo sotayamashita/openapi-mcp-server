@@ -8,24 +8,24 @@ import { ServerSchema } from "./server";
 import { referenceOr } from "./reference";
 import { CallbackSchema } from "./callback";
 
-// Operation オブジェクトスキーマ定義
+// Operation object schema definition
 export const OperationSchema = z.object({
-  // 基本情報
+  // Basic information
   tags: z.array(z.string()).optional(),
   summary: z.string().optional(),
   description: z.string().optional(),
   externalDocs: ExternalDocumentationSchema.optional(),
   operationId: z.string().optional(),
 
-  // パラメータと入力
+  // Parameters and input
   parameters: z.array(referenceOr(ParameterSchema)).optional(),
   requestBody: referenceOr(RequestBodySchema).optional(),
 
-  // レスポンスとコールバック
+  // Responses and callbacks
   responses: ResponsesSchema,
   callbacks: z.record(z.string(), referenceOr(CallbackSchema)).optional(),
 
-  // その他の属性
+  // Other attributes
   deprecated: z.boolean().optional(),
   security: z.array(SecurityRequirementSchema).optional(),
   servers: z.array(ServerSchema).optional(),

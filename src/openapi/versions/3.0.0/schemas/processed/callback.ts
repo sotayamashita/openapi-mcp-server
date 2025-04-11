@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { referenceOr } from "./reference";
 
-// Callback オブジェクトスキーマ定義
-// キーは式文字列、値はPathItemオブジェクト
-// 循環参照を避けるためにz.lazyを使用
+// Callback object schema definition
+// Key is expression string, value is PathItem object
+// Using z.lazy to avoid circular references
 export const CallbackSchema = z.record(
   z.string(),
   z.lazy(() => {
-    // 実行時に動的にインポート
+    // Dynamic import at runtime
     const { PathItemSchema } = require("./path-item");
     return referenceOr(PathItemSchema);
   }),

@@ -5,7 +5,7 @@ import { SecurityRequirementSchema } from "./security-requirement";
 import { TagSchema } from "./tag";
 import { ExternalDocumentationSchema } from "./external-documentation";
 
-// OpenAPI 3.0.0のルートオブジェクトスキーマを定義
+// Define OpenAPI 3.0.0 root object schema
 export const OpenApiObjectSchema = z.object({
   openapi: z.string().regex(/^3\.0\.\d+$/),
   info: InfoSchema,
@@ -29,10 +29,10 @@ export const OpenApiObjectSchema = z.object({
   externalDocs: ExternalDocumentationSchema.optional(),
 });
 
-// 型定義のエクスポート
+// Export type definition
 export type OpenApiObject = z.infer<typeof OpenApiObjectSchema>;
 
-// 他のスキーマをエクスポート
+// Export other schemas
 export * from "./contact";
 export * from "./external-documentation";
 export * from "./info";

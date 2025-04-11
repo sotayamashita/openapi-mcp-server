@@ -2,7 +2,7 @@ import { z } from "zod";
 import { ContactSchema } from "./contact";
 import { LicenseSchema } from "./license";
 
-// Info オブジェクトスキーマ定義
+// Info object schema definition
 export const InfoSchema = z.object({
   title: z.string(),
   version: z.string(),

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Example オブジェクトスキーマ定義
+// Example object schema definition
 export const ExampleSchema = z.object({
   summary: z.string().optional(),
   description: z.string().optional(),

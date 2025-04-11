@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { OAuthFlowsSchema } from "./oauth-flows";
 
-// セキュリティスキームタイプ
+// Security scheme type
 const securitySchemeTypeEnum = z.enum([
   "apiKey",
   "http",
@@ -9,26 +9,26 @@ const securitySchemeTypeEnum = z.enum([
   "openIdConnect",
 ]);
 
-// APIキーの場所
+// API key location
 const apiKeyLocationEnum = z.enum(["query", "header", "cookie"]);
 
-// SecurityScheme オブジェクトスキーマ定義
+// SecurityScheme object schema definition
 export const SecuritySchemeSchema = z.object({
   type: securitySchemeTypeEnum,
   description: z.string().optional(),
 
-  // apiKey タイプの場合
+  // apiKey type case
   name: z.string().optional(),
   in: apiKeyLocationEnum.optional(),
 
-  // http タイプの場合
+  // http type case
   scheme: z.string().optional(),
   bearerFormat: z.string().optional(),
 
-  // oauth2 タイプの場合
+  // oauth2 type case
   flows: OAuthFlowsSchema.optional(),
 
-  // openIdConnect タイプの場合
+  // openIdConnect type case
   openIdConnectUrl: z.string().url().optional(),
 });
 

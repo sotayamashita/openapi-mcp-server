@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { MediaTypeSchema } from "./media-type";
 
-// RequestBody オブジェクトスキーマ定義
+// RequestBody object schema definition
 export const RequestBodySchema = z.object({
   description: z.string().optional(),
   content: z.record(z.string(), MediaTypeSchema),

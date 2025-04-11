@@ -4,7 +4,7 @@ import { referenceOr } from "./reference";
 import { EncodingSchema } from "./encoding";
 import { ExampleSchema } from "./example";
 
-// MediaType オブジェクトスキーマ定義
+// MediaType object schema definition
 export const MediaTypeSchema = z.object({
   schema: referenceOr(SchemaObjectSchema).optional(),
   example: z.any().optional(),
