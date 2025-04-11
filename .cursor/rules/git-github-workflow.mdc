@@ -8,4 +8,4 @@ When asking commit:
 1. Run `git status` to show changes
 2. Run `git commit` following Conventional Commits format in **English** (`<type>[optional scope]: <description>`)
 3. Help commit meaningful units of change rather than staging everything
-4. Use `git diff --no-pager` when diff is needed.
+4. Use `git diff [optional file] | cat` when diff is needed.

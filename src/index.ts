@@ -1,20 +1,20 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import dotenv from "dotenv";
 import { dereference } from "@scalar/openapi-parser";
 import { OpenApiObjectSchema as OpenApiObjectSchemaV3_1 } from "@scalar/openapi-types/schemas/3.1/unprocessed";
 import { OpenAPIClientAxios } from "openapi-client-axios";
 import { z } from "zod";
 import type { OpenAPIV3_1 } from "openapi-types";
 import { parseCliArgs } from "./cli/args";
-
-// Load environment variables
-dotenv.config();
+import { loadConfig } from "./config";
 
 // Parse command line arguments
 const { openApiSpecPath } = parseCliArgs();
 
 async function startMCPServer(openApiSpecPath: string) {
+  // Load configuration from environment variables
+  const config = loadConfig();
+
   // Check if the API is a file path or URL
   let text;
   if (/^https?:\/\//.test(openApiSpecPath)) {
@@ -40,11 +40,8 @@ async function startMCPServer(openApiSpecPath: string) {
     const apiClient = new OpenAPIClientAxios({
       definition: validatedSchema as OpenAPIV3_1.Document,
       axiosConfigDefaults: {
-        baseURL: "http://localhost:1234",
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": "openapi-mcp-server",
-        },
+        baseURL: config.baseUrl,
+        headers: config.headers,
       },
     });
     const client = await apiClient.init();
@@ -103,46 +100,41 @@ async function startMCPServer(openApiSpecPath: string) {
               const httpMethod = operationEntry?.[0]?.toUpperCase();
               const operation = operationEntry?.[1] as any;
 
-              // リクエストURLを構築
+              // リクエストURLを構築（環境変数のBASE_URLを使用）
               let requestUrl = "";
-              if (
-                validatedSchema.servers &&
-                validatedSchema.servers.length > 0
-              ) {
-                const baseUrl = validatedSchema.servers[0].url;
-                // パスパラメータを置換
-                let pathWithParams = path;
-                if (operation?.parameters) {
-                  operation.parameters.forEach((param: any) => {
-                    if (param.in === "path" && params[param.name]) {
-                      pathWithParams = pathWithParams.replace(
-                        `{${param.name}}`,
-                        params[param.name],
-                      );
-                    }
-                  });
-                }
-                requestUrl = `${baseUrl}${pathWithParams}`;
 
-                // クエリパラメータを追加
-                const queryParams: string[] = [];
-                if (operation?.parameters) {
-                  operation.parameters.forEach((param: any) => {
-                    if (
-                      param.in === "query" &&
-                      params[param.name] !== undefined
-                    ) {
-                      queryParams.push(
-                        `${param.name}=${encodeURIComponent(
-                          params[param.name],
-                        )}`,
-                      );
-                    }
-                  });
-                }
-                if (queryParams.length > 0) {
-                  requestUrl += `?${queryParams.join("&")}`;
-                }
+              // パスパラメータを置換
+              let pathWithParams = path;
+              if (operation?.parameters) {
+                operation.parameters.forEach((param: any) => {
+                  if (param.in === "path" && params[param.name]) {
+                    pathWithParams = pathWithParams.replace(
+                      `{${param.name}}`,
+                      params[param.name],
+                    );
+                  }
+                });
+              }
+
+              // 環境変数から取得したBASE_URLを使用
+              requestUrl = `${config.baseUrl}${pathWithParams}`;
+
+              // クエリパラメータを追加
+              const queryParams: string[] = [];
+              if (operation?.parameters) {
+                operation.parameters.forEach((param: any) => {
+                  if (
+                    param.in === "query" &&
+                    params[param.name] !== undefined
+                  ) {
+                    queryParams.push(
+                      `${param.name}=${encodeURIComponent(params[param.name])}`,
+                    );
+                  }
+                });
+              }
+              if (queryParams.length > 0) {
+                requestUrl += `?${queryParams.join("&")}`;
               }
 
               console.error(

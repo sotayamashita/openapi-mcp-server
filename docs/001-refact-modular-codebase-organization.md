@@ -21,20 +21,27 @@
   - [x] テスト: `tests/cli/args.test.ts`の実装
   - [x] `src/index.ts`からCLIモジュールの利用
 
-- [ ] **Config モジュール**
+- [x] **Config モジュール**
 
-  - [ ] `src/config/index.ts`: 設定管理の実装
-  - [ ] テスト: `tests/config/index.test.ts`の実装
+  - [x] `src/config/index.ts`: 設定管理の実装
+    - [x] 環境変数（BASE_URL, HEADERS）の読み込みと検証
+    - [x] 環境変数BASE_URLを必須とし、OpenAPIスペックのservers情報に関わらず常に使用する設計
+    - [x] HEADERSのJSON解析と適切なデフォルト値の提供
+  - [x] テスト: `tests/config/index.test.ts`の実装
+    - [x] 様々な環境変数パターンでのテストケース
+    - [x] エラーケースのテスト
 
-- [ ] **Core モジュール**
+- [ ] **MCP モジュール**
 
-  - [ ] `src/core/server.ts`: MCPサーバーコア機能の実装
-  - [ ] `src/core/transport.ts`: トランスポート層の実装
-  - [ ] テスト: コアモジュールのテスト実装
+  - [ ] `src/mcp/server.ts`: MCPサーバーコア機能の実装
+  - [ ] `src/mcp/transport.ts`: トランスポート層の実装
+  - [ ] テスト: MCPモジュールのテスト実装
 
 - [ ] **OpenAPI モジュール**
 
   - [ ] `src/openapi/client.ts`: クライアント生成・管理の実装
+    - [ ] Config モジュールから取得したBASE_URLをOpenAPIClientの生成時に使用
+    - [ ] Config モジュールから取得したHEADERSをクライアント設定に適用
   - [ ] `src/openapi/parser.ts`: スペック解析の実装
   - [ ] `src/openapi/schema.ts`: スキーマ検証の実装
   - [ ] テスト: OpenAPIモジュールのテスト実装
@@ -42,7 +49,10 @@
 - [ ] **Tools モジュール**
 
   - [ ] `src/tools/builder.ts`: ツール生成ロジックの実装
+    - [ ] Config モジュールとOpenAPIモジュールを連携させたMCPツール生成
   - [ ] `src/tools/executor.ts`: ツール実行処理の実装
+    - [ ] リクエストURLの構築時にOpenAPIスペックのserversではなくConfig.baseUrlを使用
+    - [ ] パラメータの適切な処理と検証
   - [ ] テスト: Toolsモジュールのテスト実装
 
 - [ ] **Utils モジュール**
@@ -63,7 +73,7 @@ src/
 │   └── index.ts      # CLIエントリーポイント
 ├── config/
 │   └── index.ts      # 設定管理（環境変数など）
-├── core/
+├── mcp/
 │   ├── server.ts     # MCPサーバーのコア機能
 │   └── transport.ts  # トランスポート層の抽象化
 ├── openapi/
@@ -91,8 +101,11 @@ src/
 ### 2. `config/`
 
 - `index.ts`: 環境変数の読み込みと設定の管理
+  - BASE_URL: API エンドポイントの指定（必須）
+  - HEADERS: カスタムHTTPヘッダーの指定（オプション、JSON形式）
+  - 設定のバリデーションとデフォルト値の提供
 
-### 3. `core/`
+### 3. `mcp/`
 
 - `server.ts`: MCPサーバーの初期化と管理
 - `transport.ts`: 通信層の抽象化（StdioServerTransportなど）
@@ -100,13 +113,18 @@ src/
 ### 4. `openapi/`
 
 - `client.ts`: OpenAPIクライアントの生成と管理
+  - 環境変数BASE_URLを使用したクライアント設定
+  - 環境変数HEADERSを使用したカスタムヘッダー設定
 - `parser.ts`: OpenAPIスペックの解析とデリファレンス
 - `schema.ts`: スキーマのバリデーションと変換
 
 ### 5. `tools/`
 
 - `builder.ts`: OpenAPIからMCPツールを生成するロジック
+  - 環境設定を考慮したツール生成
 - `executor.ts`: ツールの実行とレスポンス処理
+  - 環境変数BASE_URLを使用したリクエストURL構築（OpenAPIのservers情報より優先）
+  - パラメータ処理とリクエスト実行
 
 ### 6. `utils/`
 
@@ -149,6 +167,54 @@ export function parseCliArgs(): CliOptions {
 
   return {
     openApiSpecPath: values.api as string,
+  };
+}
+```
+
+```typescript
+// 例: config/index.ts
+import dotenv from "dotenv";
+
+// 環境変数の型定義
+export interface ServerConfig {
+  baseUrl: string;
+  headers: Record<string, string>;
+}
+
+// デフォルト設定
+const DEFAULT_HEADERS = {
+  "Content-Type": "application/json",
+  "User-Agent": "openapi-mcp-server",
+};
+
+/**
+ * 環境変数から設定を読み込む
+ * @throws {Error} BASE_URL環境変数が設定されていない場合
+ */
+export function loadConfig(): ServerConfig {
+  // 環境変数の読み込み
+  dotenv.config();
+
+  // BASE_URLの取得と検証（必須）
+  const baseUrl = process.env.BASE_URL;
+  if (!baseUrl) {
+    throw new Error("BASE_URL environment variable is required");
+  }
+
+  // HEADERSの解析（JSONまたはデフォルト）
+  let headers = DEFAULT_HEADERS;
+  if (process.env.HEADERS) {
+    try {
+      const customHeaders = JSON.parse(process.env.HEADERS);
+      headers = { ...DEFAULT_HEADERS, ...customHeaders };
+    } catch (error) {
+      console.warn(`Invalid HEADERS format: ${error.message}. Using defaults.`);
+    }
+  }
+
+  return {
+    baseUrl,
+    headers,
   };
 }
 ```
@@ -228,13 +294,18 @@ describe("CLI Arguments Parser", () => {
 ```typescript
 // 例: src/index.ts (新しいエントリーポイント)
 import { parseCliArgs } from "./cli/args";
+import { loadConfig } from "./config";
 import { loadOpenApiSpec } from "./openapi/parser";
-import { createMcpServer } from "./core/server";
+import { createMcpServer } from "./mcp/server";
+import { createOpenApiClient } from "./openapi/client";
 import { buildToolsFromOpenApi } from "./tools/builder";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
 async function main() {
   try {
+    // 環境変数の読み込み
+    const config = loadConfig();
+
     // コマンドライン引数の処理
     const { openApiSpecPath } = parseCliArgs();
 
@@ -244,8 +315,11 @@ async function main() {
     // MCPサーバーの作成
     const server = createMcpServer(validatedSchema);
 
+    // OpenAPIクライアントの作成（環境変数BASE_URLを使用）
+    const client = await createOpenApiClient(validatedSchema, config);
+
     // OpenAPIからMCPツールを生成
-    await buildToolsFromOpenApi(server, validatedSchema);
+    await buildToolsFromOpenApi(server, validatedSchema, client, config);
 
     // サーバーの起動
     const transport = new StdioServerTransport();
@@ -257,6 +331,113 @@ async function main() {
 }
 
 main();
+```
+
+```typescript
+// 例: openapi/client.ts
+import { OpenAPIClientAxios } from "openapi-client-axios";
+import type { OpenAPIV3_1 } from "openapi-types";
+import { ServerConfig } from "../config";
+
+/**
+ * OpenAPIクライアントを生成
+ * 常に環境変数で指定されたBASE_URLを使用し、OpenAPIスペックのservers情報は無視する
+ */
+export async function createOpenApiClient(
+  schema: OpenAPIV3_1.Document,
+  config: ServerConfig,
+) {
+  const apiClient = new OpenAPIClientAxios({
+    definition: schema,
+    axiosConfigDefaults: {
+      baseURL: config.baseUrl, // 常に環境変数のBASE_URLを使用
+      headers: config.headers,
+    },
+  });
+
+  return await apiClient.init();
+}
+```
+
+```typescript
+// 例: tools/executor.ts
+import { ServerConfig } from "../config";
+
+/**
+ * リクエストURLの構築
+ * OpenAPIスペックのservers情報ではなく環境変数のBASE_URLを使用
+ */
+export function buildRequestUrl(
+  path: string,
+  params: Record<string, any>,
+  operation: any,
+  config: ServerConfig,
+): string {
+  // パスパラメータを置換
+  let pathWithParams = path;
+  if (operation?.parameters) {
+    operation.parameters.forEach((param: any) => {
+      if (param.in === "path" && params[param.name]) {
+        pathWithParams = pathWithParams.replace(
+          `{${param.name}}`,
+          params[param.name],
+        );
+      }
+    });
+  }
+
+  // ベースURLは常に環境変数から取得したものを使用
+  let requestUrl = `${config.baseUrl}${pathWithParams}`;
+
+  // クエリパラメータを追加
+  const queryParams: string[] = [];
+  if (operation?.parameters) {
+    operation.parameters.forEach((param: any) => {
+      if (param.in === "query" && params[param.name] !== undefined) {
+        queryParams.push(
+          `${param.name}=${encodeURIComponent(params[param.name])}`,
+        );
+      }
+    });
+  }
+  if (queryParams.length > 0) {
+    requestUrl += `?${queryParams.join("&")}`;
+  }
+
+  return requestUrl;
+}
+
+/**
+ * ツール実行のためのリクエスト処理
+ */
+export async function executeApiRequest(
+  client: any,
+  operationId: string,
+  params: Record<string, any>,
+) {
+  try {
+    const response = await client[operationId](params);
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(response.data),
+        },
+      ],
+    };
+  } catch (error: any) {
+    console.error(`Error executing ${operationId}:`, error);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error: ${error.message}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+}
 ```
 
 ### 5. Defensive Programming
@@ -301,7 +482,7 @@ export async function loadOpenApiSpec(specPath: string): Promise<any> {
 1. **フェーズ1**: 基本的なディレクトリ構造の作成と既存コードの分割
 
    - ディレクトリ構造のセットアップ
-   - コアモジュールの実装
+   - MCPモジュールの実装
    - 基本的なテストの追加
 
 2. **フェーズ2**: エラーハンドリングと型安全性の強化
@@ -328,5 +509,7 @@ export async function loadOpenApiSpec(specPath: string): Promise<any> {
 - **依存性注入**: 柔軟なテストとモック化のための依存性注入パターンの活用
 - **ログ機能の強化**: 適切なログレベルとフォーマットの導入
 - **設定の柔軟化**: 環境変数や設定ファイルによる設定の外部化
+  - BASE_URLとHEADERSの適切な取り扱い
+  - OpenAPIスペックのservers情報より環境変数の設定を優先
 - **バージョン管理**: APIバージョンの管理と互換性の確保
 - **パフォーマンス最適化**: 必要に応じたキャッシングやその他の最適化手法の導入
