@@ -4,11 +4,56 @@ import {
   validateOperationIds,
   generateOperationId,
   validateSchema,
+  detectOpenApiVersion,
 } from "../../src/openapi/schema";
 import type { OpenApiParameter } from "../../src/openapi/schema";
 import { z } from "zod";
 
 describe("OpenAPI Schema Module", () => {
+  describe("detectOpenApiVersion", () => {
+    it("should detect OpenAPI 3.1.0 version", () => {
+      const schema = {
+        openapi: "3.1.0",
+        info: {
+          title: "Test API",
+          version: "1.0.0",
+        },
+      };
+
+      expect(detectOpenApiVersion(schema)).toBe("3.1.0");
+    });
+
+    it("should detect OpenAPI 3.0.0 version", () => {
+      const schema = {
+        openapi: "3.0.0",
+        info: {
+          title: "Test API",
+          version: "1.0.0",
+        },
+      };
+
+      expect(detectOpenApiVersion(schema)).toBe("3.0.0");
+    });
+
+    it("should handle minor versions correctly", () => {
+      const schema1 = { openapi: "3.1.1" };
+      const schema2 = { openapi: "3.0.3" };
+
+      expect(detectOpenApiVersion(schema1)).toBe("3.1.0");
+      expect(detectOpenApiVersion(schema2)).toBe("3.0.0");
+    });
+
+    it("should default to 3.1.0 for unknown versions", () => {
+      const schema1 = { openapi: "4.0.0" };
+      const schema2 = { swagger: "2.0" };
+      const schema3 = {};
+
+      expect(detectOpenApiVersion(schema1)).toBe("3.1.0");
+      expect(detectOpenApiVersion(schema2)).toBe("3.1.0");
+      expect(detectOpenApiVersion(schema3)).toBe("3.1.0");
+    });
+  });
+
   describe("createParameterSchema", () => {
     it("should create parameter schema from OpenAPI parameters", () => {
       const parameters: OpenApiParameter[] = [

@@ -2,6 +2,35 @@ import { dereference } from "@scalar/openapi-parser";
 import { OpenApiObjectSchema as OpenApiObjectSchemaV3_1 } from "@scalar/openapi-types/schemas/3.1/unprocessed";
 import type { OpenAPIV3_1 } from "openapi-types";
 import { validateSchema } from "./schema";
+import { parseOpenApi as parseOpenApiV3_0 } from "./versions/3.0.0/parser";
+
+/**
+ * Detects the OpenAPI version
+ * @param schema OpenAPI schema
+ * @returns OpenAPI version (3.0.0 or 3.1.0)
+ */
+function detectOpenApiVersion(schema: any): string {
+  // OpenAPI 3.1.0 is openapi: 3.1.x format
+  if (
+    schema.openapi &&
+    typeof schema.openapi === "string" &&
+    schema.openapi.startsWith("3.1")
+  ) {
+    return "3.1.0";
+  }
+
+  // OpenAPI 3.0.0 is openapi: 3.0.x format
+  if (
+    schema.openapi &&
+    typeof schema.openapi === "string" &&
+    schema.openapi.startsWith("3.0")
+  ) {
+    return "3.0.0";
+  }
+
+  // Default to 3.1.0
+  return "3.1.0";
+}
 
 /**
  * Loads, parses and validates an OpenAPI specification
@@ -33,12 +62,21 @@ export async function loadOpenApiSpec(
     // Parse and dereference schema
     const { schema } = await dereference(text);
 
-    // Validate schema
+    // OpenAPIのバージョンを判定
+    const version = detectOpenApiVersion(schema);
+
+    // バージョンに応じたパースと検証
     let validatedSchema: any = schema;
     try {
-      validatedSchema = OpenApiObjectSchemaV3_1.parse(schema);
+      if (version === "3.1.0") {
+        // 3.1.0の場合
+        validatedSchema = OpenApiObjectSchemaV3_1.parse(schema);
+      } else if (version === "3.0.0") {
+        // 3.0.0の場合
+        validatedSchema = parseOpenApiV3_0(schema);
+      }
     } catch (error) {
-      console.error("OpenAPI schema parsing warnings:", error);
+      console.error(`OpenAPI ${version} schema parsing warnings:`, error);
       // Continue with the original schema
     }
 

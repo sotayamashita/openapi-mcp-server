@@ -1,0 +1,8 @@
+openapi: 3.0.0
+# Missing required info object
+paths:
+  /test:
+    get:
+      responses:
+        "200":
+          description: OK

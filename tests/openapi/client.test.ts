@@ -20,12 +20,12 @@ mock.module("openapi-client-axios", () => {
   };
 });
 
-// テスト用のOpenAPIドキュメント
-const createTestSchema = (): OpenAPIV3_1.Document => {
+// テスト用のOpenAPI 3.1.0ドキュメント
+const createTestSchema = (version = "3.1.0"): OpenAPIV3_1.Document => {
   return {
-    openapi: "3.1.0",
+    openapi: version,
     info: {
-      title: "Test API",
+      title: `Test API ${version}`,
       version: "1.0.0",
     },
     paths: {
@@ -83,8 +83,17 @@ const testConfig: ServerConfig = {
 
 describe("OpenAPI Client Module", () => {
   describe("createOpenApiClient", () => {
-    it("should create a client with correct configuration", async () => {
-      const schema = createTestSchema();
+    it("should create a client with OpenAPI 3.1.0 schema", async () => {
+      const schema = createTestSchema("3.1.0");
+      const client = await createOpenApiClient(schema, testConfig);
+
+      // クライアントが作成されることを確認
+      expect(client).toBeDefined();
+      expect(client.api).toBeDefined();
+    });
+
+    it("should create a client with OpenAPI 3.0.0 schema", async () => {
+      const schema = createTestSchema("3.0.0");
       const client = await createOpenApiClient(schema, testConfig);
 
       // クライアントが作成されることを確認
@@ -114,8 +123,18 @@ describe("OpenAPI Client Module", () => {
   });
 
   describe("extractOperationIds", () => {
-    it("should extract all operation IDs from schema", () => {
-      const schema = createTestSchema();
+    it("should extract all operation IDs from OpenAPI 3.1.0 schema", () => {
+      const schema = createTestSchema("3.1.0");
+      const operationIds = extractOperationIds(schema);
+
+      expect(operationIds).toBeArrayOfSize(3);
+      expect(operationIds).toContain("getUsers");
+      expect(operationIds).toContain("createUser");
+      expect(operationIds).toContain("getUserById");
+    });
+
+    it("should extract all operation IDs from OpenAPI 3.0.0 schema", () => {
+      const schema = createTestSchema("3.0.0");
       const operationIds = extractOperationIds(schema);
 
       expect(operationIds).toBeArrayOfSize(3);
