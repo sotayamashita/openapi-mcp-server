@@ -140,22 +140,22 @@ The codebase follows a modular organization pattern with clear separation of con
 ```
 src/
 ├── cli/              # Command-line interface
-│   ├── args.ts      # CLI arguments processing
-│   └── index.ts     # CLI entry point
+│   ├── args.ts       # CLI arguments processing
+│   └── index.ts      # CLI entry point
 ├── config/           # Configuration management
-│   └── index.ts     # Environment variables and settings
+│   └── index.ts      # Environment variables and settings
 ├── mcp/              # MCP protocol implementation
-│   ├── server.ts    # MCP server core functionality
-│   └── transport.ts # Transport layer abstraction
+│   ├── server.ts     # MCP server core functionality
+│   └── transport.ts  # Transport layer abstraction
 ├── openapi/          # OpenAPI specification handling
-│   ├── client.ts    # OpenAPI client generation
-│   ├── parser.ts    # Spec parsing and validation
-│   └── schema.ts    # Schema validation and conversion
+│   ├── client.ts     # OpenAPI client generation
+│   ├── parser.ts     # Spec parsing and validation
+│   └── schema.ts     # Schema validation and conversion
 ├── tools/            # MCP tools management
-│   ├── builder.ts   # Tool generation from OpenAPI
-│   └── executor.ts  # Tool execution and response handling
+│   ├── builder.ts    # Tool generation from OpenAPI
+│   └── executor.ts   # Tool execution and response handling
 ├── types/            # Type definitions
-│   └── index.ts     # Common type declarations
+│   └── index.ts      # Common type declarations
 └── index.ts          # Application entry point
 ```
 
