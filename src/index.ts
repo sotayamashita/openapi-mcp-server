@@ -1,5 +1,3 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import type { OpenAPIV3_1 } from "openapi-types";
 import { parseCliArgs } from "./cli/args";
@@ -9,6 +7,7 @@ import {
   createOpenApiClient,
   createParameterSchema,
 } from "./openapi";
+import { McpServer, StdioServerTransport } from "./mcp";
 
 /**
  * Main entry point for MCP server
@@ -169,6 +168,7 @@ async function main() {
       }
     }
 
+    // Connect using stdio transport
     const transport = new StdioServerTransport();
     await server.connect(transport);
     console.error("MCP server connected and ready");
