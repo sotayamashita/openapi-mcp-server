@@ -4,11 +4,11 @@ import path from "node:path";
 import fs from "node:fs";
 import type { OpenAPIV3_1 } from "openapi-types";
 
-describe("OpenAPI 3.0.0認証パターン", () => {
+describe("OpenAPI 3.0.0 Authentication Patterns", () => {
   let schema: OpenAPIV3_1.Document;
 
   beforeAll(async () => {
-    // 認証パターンのスキーマをロードする
+    // Load authentication patterns schema
     const specPath = path.join(
       "tests",
       "openapi",
@@ -17,104 +17,104 @@ describe("OpenAPI 3.0.0認証パターン", () => {
       "authentication-patterns.yaml",
     );
 
-    // ファイルが存在することを確認
+    // Verify file exists
     expect(fs.existsSync(specPath)).toBe(true);
 
     schema = await loadOpenApiSpec(specPath);
   });
 
-  it("スキーマがOpenAPI 3.0.0として正しく解析されること", async () => {
+  it("should correctly parse schema as OpenAPI 3.0.0", async () => {
     expect(schema).toBeDefined();
     expect(schema.openapi).toBe("3.0.0");
     expect(schema.info.title).toBe("Authentication Patterns API");
   });
 
-  it("securitySchemesが正しく定義されていること", () => {
-    // components.securitySchemesが存在することを確認
+  it("should correctly define securitySchemes", () => {
+    // Verify components.securitySchemes exists
     expect(schema.components?.securitySchemes).toBeDefined();
     const securitySchemes = schema.components?.securitySchemes || {};
 
-    // Basic認証
+    // Basic Authentication
     expect(securitySchemes.basicAuth).toBeDefined();
     expect((securitySchemes.basicAuth as any)?.type).toBe("http");
     expect((securitySchemes.basicAuth as any)?.scheme).toBe("basic");
 
-    // Bearer認証
+    // Bearer Authentication
     expect(securitySchemes.bearerAuth).toBeDefined();
     expect((securitySchemes.bearerAuth as any)?.type).toBe("http");
     expect((securitySchemes.bearerAuth as any)?.scheme).toBe("bearer");
     expect((securitySchemes.bearerAuth as any)?.bearerFormat).toBe("JWT");
 
-    // Digest認証
+    // Digest Authentication
     expect(securitySchemes.digestAuth).toBeDefined();
     expect((securitySchemes.digestAuth as any)?.type).toBe("http");
     expect((securitySchemes.digestAuth as any)?.scheme).toBe("digest");
 
-    // APIキー（ヘッダー）
+    // API Key (Header)
     expect(securitySchemes.apiKeyHeader).toBeDefined();
     expect((securitySchemes.apiKeyHeader as any)?.type).toBe("apiKey");
     expect((securitySchemes.apiKeyHeader as any)?.in).toBe("header");
     expect((securitySchemes.apiKeyHeader as any)?.name).toBe("X-API-Key");
 
-    // APIキー（クエリ）
+    // API Key (Query)
     expect(securitySchemes.apiKeyQuery).toBeDefined();
     expect((securitySchemes.apiKeyQuery as any)?.type).toBe("apiKey");
     expect((securitySchemes.apiKeyQuery as any)?.in).toBe("query");
     expect((securitySchemes.apiKeyQuery as any)?.name).toBe("api_key");
 
-    // APIキー（Cookie）
+    // API Key (Cookie)
     expect(securitySchemes.apiKeyCookie).toBeDefined();
     expect((securitySchemes.apiKeyCookie as any)?.type).toBe("apiKey");
     expect((securitySchemes.apiKeyCookie as any)?.in).toBe("cookie");
     expect((securitySchemes.apiKeyCookie as any)?.name).toBe("SESSIONID");
   });
 
-  it("パスが認証要件を正しく定義していること", () => {
-    // パスが存在することを確認
+  it("should correctly define authentication requirements for paths", () => {
+    // Verify paths exist
     expect(schema.paths).toBeDefined();
     const paths = schema.paths || {};
 
-    // Basic認証のエンドポイント
+    // Basic Authentication endpoint
     expect(paths["/auth/basic"]).toBeDefined();
     expect(paths["/auth/basic"]?.get?.security).toContainEqual({
       basicAuth: [],
     });
 
-    // Bearer認証のエンドポイント
+    // Bearer Authentication endpoint
     expect(paths["/auth/bearer"]).toBeDefined();
     expect(paths["/auth/bearer"]?.get?.security).toContainEqual({
       bearerAuth: [],
     });
 
-    // Digest認証のエンドポイント
+    // Digest Authentication endpoint
     expect(paths["/auth/digest"]).toBeDefined();
     expect(paths["/auth/digest"]?.get?.security).toContainEqual({
       digestAuth: [],
     });
 
-    // APIキー（ヘッダー）のエンドポイント
+    // API Key (Header) endpoint
     expect(paths["/auth/apikey/header"]).toBeDefined();
     expect(paths["/auth/apikey/header"]?.get?.security).toContainEqual({
       apiKeyHeader: [],
     });
 
-    // APIキー（クエリ）のエンドポイント
+    // API Key (Query) endpoint
     expect(paths["/auth/apikey/query"]).toBeDefined();
     expect(paths["/auth/apikey/query"]?.get?.security).toContainEqual({
       apiKeyQuery: [],
     });
 
-    // APIキー（Cookie）のエンドポイント
+    // API Key (Cookie) endpoint
     expect(paths["/auth/apikey/cookie"]).toBeDefined();
     expect(paths["/auth/apikey/cookie"]?.get?.security).toContainEqual({
       apiKeyCookie: [],
     });
   });
 
-  it("複数の認証方式が正しく定義されていること", () => {
+  it("should correctly define multiple authentication methods", () => {
     const paths = schema.paths || {};
 
-    // 複数の認証方式のいずれかを使用するエンドポイント
+    // Endpoint using any of multiple authentication methods
     expect(paths["/auth/multiple-options"]).toBeDefined();
     const multipleSecurity =
       paths["/auth/multiple-options"]?.get?.security || [];
@@ -123,7 +123,7 @@ describe("OpenAPI 3.0.0認証パターン", () => {
     expect(multipleSecurity).toContainEqual({ bearerAuth: [] });
     expect(multipleSecurity).toContainEqual({ apiKeyHeader: [] });
 
-    // 複数の認証方式をすべて組み合わせて使用するエンドポイント
+    // Endpoint requiring combination of multiple authentication methods
     expect(paths["/auth/combined"]).toBeDefined();
     const combinedSecurity = paths["/auth/combined"]?.get?.security || [];
     expect(combinedSecurity).toHaveLength(1);

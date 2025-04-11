@@ -18,7 +18,7 @@ beforeAll(() => {
 describe("OpenAPI Parser Module", () => {
   describe("loadOpenApiSpec", () => {
     it("should load and parse a valid OpenAPI 3.1.0 spec from file", async () => {
-      // 3.1.0形式のモックテストファイルを作成
+      // Create mock test file in 3.1.0 format
       const specPath = path.join(
         "tests",
         "openapi",
@@ -53,7 +53,7 @@ describe("OpenAPI Parser Module", () => {
     });
 
     it("should load and parse a valid OpenAPI 3.0.0 spec from file", async () => {
-      // 3.0.0形式のモックテストファイルを作成
+      // Create mock test file in 3.0.0 format
       const specPath = path.join(
         "tests",
         "openapi",

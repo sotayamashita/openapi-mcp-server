@@ -1,151 +1,151 @@
 openapi: 3.0.0
 info:
   title: Authentication Patterns API
-  description: APIの認証パターンをテストするためのOpenAPI 3.0.0スキーマ
+  description: OpenAPI 3.0.0 schema for testing API authentication patterns
   version: 1.0.0
 
 servers:
   - url: https://api.example.com/v1
 
-# 認証定義
+# Authentication definitions
 components:
   securitySchemes:
-    # Basic認証
+    # Basic authentication
     basicAuth:
       type: http
       scheme: basic
-      description: Basic認証（ユーザー名とパスワード）
+      description: Basic authentication (username and password)
 
-    # Bearer認証
+    # Bearer authentication
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWTトークンを使用したBearer認証
+      description: Bearer authentication using JWT token
 
-    # Digest認証（RFC 7235で定義された認証スキーム）
+    # Digest authentication (authentication scheme defined in RFC 7235)
     digestAuth:
       type: http
       scheme: digest
-      description: Digest認証
+      description: Digest authentication
 
-    # ヘッダーでのAPIキー
+    # API key in header
     apiKeyHeader:
       type: apiKey
       in: header
       name: X-API-Key
-      description: ヘッダーでのAPIキー認証
+      description: API key authentication in header
 
-    # クエリパラメータでのAPIキー
+    # API key in query parameter
     apiKeyQuery:
       type: apiKey
       in: query
       name: api_key
-      description: クエリパラメータでのAPIキー認証
+      description: API key authentication in query parameter
 
-    # CookieでのAPIキー
+    # API key in cookie
     apiKeyCookie:
       type: apiKey
       in: cookie
       name: SESSIONID
-      description: CookieでのAPIキー認証
+      description: API key authentication in cookie
 
 paths:
-  # Basic認証を使用するエンドポイント
+  # Endpoint using Basic authentication
   /auth/basic:
     get:
-      summary: Basic認証を使用するエンドポイント
+      summary: Endpoint using Basic authentication
       security:
         - basicAuth: []
       responses:
         "200":
-          description: 認証成功
+          description: Authentication successful
         "401":
-          description: 認証失敗
+          description: Authentication failed
 
-  # Bearer認証を使用するエンドポイント
+  # Endpoint using Bearer authentication
   /auth/bearer:
     get:
-      summary: Bearer認証を使用するエンドポイント
+      summary: Endpoint using Bearer authentication
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: 認証成功
+          description: Authentication successful
         "401":
-          description: 認証失敗
+          description: Authentication failed
 
-  # Digest認証を使用するエンドポイント
+  # Endpoint using Digest authentication
   /auth/digest:
     get:
-      summary: Digest認証を使用するエンドポイント
+      summary: Endpoint using Digest authentication
       security:
         - digestAuth: []
       responses:
         "200":
-          description: 認証成功
+          description: Authentication successful
         "401":
-          description: 認証失敗
+          description: Authentication failed
 
-  # APIキー（ヘッダー）を使用するエンドポイント
+  # Endpoint using API key in header
   /auth/apikey/header:
     get:
-      summary: ヘッダーでのAPIキーを使用するエンドポイント
+      summary: Endpoint using API key in header
       security:
         - apiKeyHeader: []
       responses:
         "200":
-          description: 認証成功
+          description: Authentication successful
         "401":
-          description: 認証失敗
+          description: Authentication failed
 
-  # APIキー（クエリ）を使用するエンドポイント
+  # Endpoint using API key in query parameter
   /auth/apikey/query:
     get:
-      summary: クエリパラメータでのAPIキーを使用するエンドポイント
+      summary: Endpoint using API key in query parameter
       security:
         - apiKeyQuery: []
       responses:
         "200":
-          description: 認証成功
+          description: Authentication successful
         "401":
-          description: 認証失敗
+          description: Authentication failed
 
-  # APIキー（Cookie）を使用するエンドポイント
+  # Endpoint using API key in cookie
   /auth/apikey/cookie:
     get:
-      summary: CookieでのAPIキーを使用するエンドポイント
+      summary: Endpoint using API key in cookie
       security:
         - apiKeyCookie: []
       responses:
         "200":
-          description: 認証成功
+          description: Authentication successful
         "401":
-          description: 認証失敗
+          description: Authentication failed
 
-  # 複数の認証方式を組み合わせたエンドポイント（いずれか一つで認証可能）
+  # Endpoint combining multiple authentication methods (any one is acceptable)
   /auth/multiple-options:
     get:
-      summary: 複数の認証方式のいずれかを使用するエンドポイント
+      summary: Endpoint using any one of multiple authentication methods
       security:
         - basicAuth: []
         - bearerAuth: []
         - apiKeyHeader: []
       responses:
         "200":
-          description: 認証成功
+          description: Authentication successful
         "401":
-          description: 認証失敗
+          description: Authentication failed
 
-  # 複数の認証方式を組み合わせたエンドポイント（すべて必要）
+  # Endpoint combining multiple authentication methods (all required)
   /auth/combined:
     get:
-      summary: 複数の認証方式をすべて組み合わせて使用するエンドポイント
+      summary: Endpoint requiring all specified authentication methods
       security:
         - bearerAuth: []
           apiKeyHeader: []
       responses:
         "200":
-          description: 認証成功
+          description: Authentication successful
         "401":
-          description: 認証失敗
+          description: Authentication failed
