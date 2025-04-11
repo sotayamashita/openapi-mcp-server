@@ -31,15 +31,19 @@
     - [x] 様々な環境変数パターンでのテストケース
     - [x] エラーケースのテスト
 
-- [ ] **MCP モジュール**
+- [x] **MCP モジュール**
 
-  - [ ] `src/mcp/server.ts`: MCPサーバーコア機能の実装
-    - [ ] MCPサーバーの初期化と設定
-    - [ ] クライアントとの接続管理
-    - [ ] メッセージの送受信
-    - [ ] プロトコル準拠の保証
-  - [ ] `src/mcp/transport.ts`: トランスポート層の実装
-  - [ ] テスト: MCPモジュールのテスト実装
+  - [x] `src/mcp/server.ts`: MCPサーバーコア機能の実装
+    - [x] MCPサーバーの初期化と設定
+    - [x] クライアントとの接続管理
+    - [x] ツール登録と実行
+    - [x] プロトコル準拠の保証
+  - [x] `src/mcp/transport.ts`: トランスポート層の実装
+  - [x] `src/mcp/index.ts`: モジュールのエクスポート設定
+  - [x] テスト: MCPモジュールのテスト実装
+    - [x] `tests/mcp/server.test.ts`: サーバー機能のテスト
+    - [x] `tests/mcp/transport.test.ts`: トランスポートのテスト
+    - [x] `tests/mcp/index.test.ts`: モジュール統合テスト
 
 - [x] **OpenAPI モジュール**
 
@@ -76,8 +80,11 @@
   - [ ] `src/utils/validation.ts`: バリデーションヘルパーの実装
   - [ ] テスト: Utilsモジュールのテスト実装
 
-- [ ] **Types モジュール**
-  - [ ] `src/types/index.ts`: 共通型定義の実装
+- [x] **Types モジュール**
+  - [x] `src/types/index.ts`: 共通型定義の実装
+    - [x] ツール関連の型定義（ToolExecutor、ToolResponse、ToolContentItem）
+    - [x] OpenAPI関連の型定義（Parameter、Operation）
+    - [x] MCP SDKとの型互換性の確保
 
 ## 提案するディレクトリ構造
 
