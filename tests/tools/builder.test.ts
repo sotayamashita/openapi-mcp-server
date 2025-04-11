@@ -5,7 +5,7 @@ import type { OpenAPIV3_1 } from "openapi-types";
 import type { ServerConfig } from "../../src/config";
 import type { ToolResponse } from "../../src/types";
 
-// McpServerのモック実装
+// Mock implementation of McpServer
 const createMockServer = () => {
   const tools = new Map<string, any>();
 
@@ -27,7 +27,7 @@ const createMockServer = () => {
   return server as unknown as McpServer & { getTools: () => Map<string, any> };
 };
 
-// テスト用のOpenAPIクライアントモック
+// Mock OpenAPI client for testing
 const createMockClient = () => {
   return {
     getUsers: async () => ({
@@ -42,7 +42,7 @@ const createMockClient = () => {
   };
 };
 
-// テスト用のOpenAPI スキーマ
+// Test OpenAPI schema
 const createTestSchema = (): OpenAPIV3_1.Document => {
   return {
     openapi: "3.1.0",
@@ -95,7 +95,7 @@ const createTestSchema = (): OpenAPIV3_1.Document => {
   };
 };
 
-// テスト用の設定
+// Test configuration
 const testConfig: ServerConfig = {
   baseUrl: "https://test-api.example.com",
   headers: {
@@ -105,7 +105,7 @@ const testConfig: ServerConfig = {
 
 describe("Tools Builder Module", () => {
   it("should build tools from OpenAPI schema", async () => {
-    // コンソール出力をモック
+    // Mock console output
     const consoleErrorSpy = spyOn(console, "error").mockImplementation(
       () => {},
     );
@@ -122,34 +122,34 @@ describe("Tools Builder Module", () => {
       testConfig,
     );
 
-    // 正しい数のツールが登録されたか確認
+    // Verify correct number of tools registered
     expect(count).toBe(3);
     expect(server.getTools().size).toBe(3);
 
-    // 特定のツールが登録されているか確認
+    // Verify specific tools are registered
     expect(server.getTools().has("getUsers")).toBe(true);
     expect(server.getTools().has("createUser")).toBe(true);
     expect(server.getTools().has("getUserById")).toBe(true);
 
-    // ツールの説明とパラメータが正しいか確認
+    // Verify tool description and parameters
     const getUsersTool = server.getTools().get("getUsers");
     expect(getUsersTool.description).toBe("Get a list of users");
     expect(Object.keys(getUsersTool.paramSchema)).toContain("limit");
 
-    // スパイをリセット
+    // Reset spies
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
   });
 
   it("should handle empty operationIds", async () => {
-    // スキーマのpathsをカスタマイズ
+    // Customize schema paths
     const schema = createTestSchema();
     schema.paths = {};
 
     const server = createMockServer();
     const client = createMockClient();
 
-    // コンソール出力をモック
+    // Mock console output
     const consoleWarnSpy = spyOn(console, "warn").mockImplementation(() => {});
 
     const count = await buildToolsFromOpenApi(
@@ -159,11 +159,11 @@ describe("Tools Builder Module", () => {
       testConfig,
     );
 
-    // ツールが登録されていないことを確認
+    // Verify no tools are registered
     expect(count).toBe(0);
     expect(server.getTools().size).toBe(0);
 
-    // 警告が出力されたことを確認
+    // Verify warning was logged
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       "No operation IDs found in the OpenAPI schema",
     );
@@ -175,7 +175,7 @@ describe("Tools Builder Module", () => {
     const server = createMockServer();
     const client = createMockClient();
 
-    // エラーを発生させるためにschemaをnullに
+    // Set schema to null to trigger error
     const schema = null as unknown as OpenAPIV3_1.Document;
 
     await expect(
