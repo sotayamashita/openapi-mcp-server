@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+When asked, to create a commit:
+1. Run `git status` to check changes
+2. Run `git commit` following Conventional Commits format in **English** (`<type>[optional scope]: <description>`)
+3. Help commit meaningful units of change rather than staging everything
+4. Use `git diff [optional file(s)] | cat` when diff is needed.
+
+When asked, to submit a PR (Note: Use `gh` and assume I am already authenticated correctly):
+1. Run `git status` to check changes
+2. Run `git add .`  to add all the changes to the staging area (IF NEEDED)
+3. Run `git commit` to commit changes (IF NEEDED)
+4. Run `git push`   to push the changes to the remote repository (IF NEEDED)
+5. Run `git branch` to check the current branch
+6. Run `git log main..[Insert current branch]`
+7. Run `git diff --name-status main` to check to see what files have been changed
+8. Run `gh pr create --title "Title goes here..." --body "Example body..."`

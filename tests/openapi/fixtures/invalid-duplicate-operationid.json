@@ -1,0 +1,32 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Invalid API with Duplicate OperationID",
+    "version": "1.0.0",
+    "description": "An API with duplicate operationIds for testing validation"
+  },
+  "paths": {
+    "/users": {
+      "get": {
+        "operationId": "duplicateOperation",
+        "summary": "Get users",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "operationId": "duplicateOperation",
+        "summary": "Get products",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    }
+  }
+}

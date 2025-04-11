@@ -32,38 +32,58 @@ bun run src/index.ts ./path/to/openapi.yml
 bun run src/index.ts --api https://example.com/api-spec.json
 ```
 
-### Integration with Claude Desktop
+## Configuration
 
-To use this MCP server with Claude Desktop, add it to your configuration:
+### Environment Variables
 
-```bash
-# macOS/Linux
-code ~/Library/Application\ Support/Claude/claude_desktop_config.json
-```
+- **`BASE_URL`**
 
-Add the following to your configuration:
+  - Required: Yes
+  - Description: API endpoint. [Server Object](https://swagger.io/specification#server-object)'s URL
 
-```json
-{
-  "mcpServer": {
-    "openapi-mcp-server": {
-      "command": "bun",
-      "args": [
-        "/path/to/openapi-mcp-server/src/index.ts",
-        // OpenAPI/Swagger spec URL or absolute file path
-        "/path/to/openapi-mcp-server/demo/openapi.yml"
-      ]
-    }
-  }
-}
-```
+- **`HEADERS`**
+  - Required: No
+  - Default: `{"Content-Type": "application/json","User-Agent": "openapi-mcp-server"}`
+  - Description: Custom headers that will overwrite default headers
+
+### Claude Desktop Integration
+
+To use this MCP server with Claude Desktop:
+
+1. Open your Claude Desktop configuration file:
+
+   ```bash
+   # macOS/Linux
+   code ~/Library/Application\ Support/Claude/claude_desktop_config.json
+   ```
+
+2. Add the following configuration:
+   ```json
+   {
+     "mcpServer": {
+       "openapi-mcp-server": {
+         "command": "bun",
+         "args": [
+           "/path/to/openapi-mcp-server/src/index.ts",
+           "/path/to/openapi-mcp-server/demo/openapi.yml"
+         ],
+         "env": {
+           "BASE_URL": "https://api.example.com/v1/",
+           "HEADERS": "{\"Authorization\": \"Bearer ****\"}"
+         }
+       }
+     }
+   }
+   ```
 
 For more detailed instructions, see the [MCP quickstart guide](https://modelcontextprotocol.io/quickstart/user).
 
 ## Development
 
+### Development Commands
+
 ```bash
-# Run simple api server for test using simple openapi.yml
+# Run simple api server for test using simple demo/openapi.yml
 bun start:server
 
 # Run @modelcontextprotocol/inspector
@@ -84,3 +104,38 @@ bun test --coverage
 # Format code
 bun run format
 ```
+
+### Codebase Structure
+
+The codebase follows a modular organization pattern with clear separation of concerns:
+
+```
+src/
+├── cli/              # Command-line interface
+│   ├── args.ts      # CLI arguments processing
+│   └── index.ts     # CLI entry point
+├── config/           # Configuration management
+│   └── index.ts     # Environment variables and settings
+├── mcp/              # MCP protocol implementation
+│   ├── server.ts    # MCP server core functionality
+│   └── transport.ts # Transport layer abstraction
+├── openapi/          # OpenAPI specification handling
+│   ├── client.ts    # OpenAPI client generation
+│   ├── parser.ts    # Spec parsing and validation
+│   └── schema.ts    # Schema validation and conversion
+├── tools/            # MCP tools management
+│   ├── builder.ts   # Tool generation from OpenAPI
+│   └── executor.ts  # Tool execution and response handling
+├── types/            # Type definitions
+│   └── index.ts     # Common type declarations
+└── index.ts          # Application entry point
+```
+
+### Module Responsibilities
+
+- **CLI Module**: Handles command-line arguments and user interaction
+- **Config Module**: Manages environment variables (BASE_URL, HEADERS) and configuration validation
+- **MCP Module**: Implements the Model Context Protocol server and transport layers
+- **OpenAPI Module**: Processes OpenAPI specifications, generates clients, and validates schemas
+- **Tools Module**: Converts OpenAPI operations to MCP tools and handles their execution
+- **Types Module**: Provides common type definitions across the application
