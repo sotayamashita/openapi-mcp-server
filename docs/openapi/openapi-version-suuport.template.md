@@ -3,8 +3,7 @@ Prompt (Do not edit):
 docs/openapi-version-suuport.template.md のテンプレートを利用して vx.x.x に対応する計画書を docs/openapi/versions/x.x.x/ 以下に作成してください。
 -->
 
-# OpenAPI Version Suport Template
-
+# OpenAPI Version Support Template
 ## 1. 背景と目的
 
 現在、`@scalar/openapi-types` の `OpenApiObjectSchema` は `v3.1.0` のみに対応。本計画では、{{TARGET_VERSION}} に対応する独立したスキーマ実装を作成。
