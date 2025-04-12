@@ -1,8 +1,9 @@
 import { parseCliArgs } from "./cli/args";
 import { loadConfig } from "./config";
 import { loadOpenApiSpec, createOpenApiClient } from "./openapi";
-import { McpServer, StdioServerTransport } from "./mcp";
-import { buildToolsFromOpenApi } from "./tools";
+import { McpServer } from "./mcp/server";
+import { StdioServerTransport } from "./mcp/transport";
+import { buildToolsFromOpenApi } from "./tools/builder";
 
 /**
  * Main entry point for MCP server

@@ -1,6 +1,5 @@
 import { describe, it, expect, mock, spyOn } from "bun:test";
-import { McpServer } from "../../src/mcp";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { McpServer } from "../../src/mcp/server";
 import { z } from "zod";
 
 // Mock MCP server

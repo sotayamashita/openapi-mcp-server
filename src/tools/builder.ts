@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { OpenAPIV3_1 } from "openapi-types";
+import type { OpenAPI } from "openapi-types";
 import { McpServer } from "../mcp/server";
 import type { ServerConfig } from "../config";
 import type { Operation } from "../types";
@@ -17,7 +17,7 @@ import { executeApiRequest } from "./executor";
  */
 export async function buildToolsFromOpenApi(
   server: McpServer,
-  schema: OpenAPIV3_1.Document,
+  schema: OpenAPI.Document,
   client: any,
   config: ServerConfig,
 ): Promise<number> {
@@ -86,7 +86,7 @@ export async function buildToolsFromOpenApi(
  * @returns Operation details or undefined
  */
 function findOperationById(
-  schema: OpenAPIV3_1.Document,
+  schema: OpenAPI.Document,
   operationId: string,
 ): Operation | undefined {
   if (!schema.paths) {

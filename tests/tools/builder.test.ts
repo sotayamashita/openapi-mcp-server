@@ -1,9 +1,8 @@
 import { describe, it, expect, mock, spyOn } from "bun:test";
 import { buildToolsFromOpenApi } from "../../src/tools/builder";
 import { McpServer } from "../../src/mcp/server";
-import type { OpenAPIV3_1 } from "openapi-types";
+import type { OpenAPI } from "openapi-types";
 import type { ServerConfig } from "../../src/config";
-import type { ToolResponse } from "../../src/types";
 
 // Mock implementation of McpServer
 const createMockServer = () => {
@@ -43,7 +42,7 @@ const createMockClient = () => {
 };
 
 // Test OpenAPI schema
-const createTestSchema = (): OpenAPIV3_1.Document => {
+const createTestSchema = (): OpenAPI.Document => {
   return {
     openapi: "3.1.0",
     info: {
@@ -176,7 +175,7 @@ describe("Tools Builder Module", () => {
     const client = createMockClient();
 
     // Set schema to null to trigger error
-    const schema = null as unknown as OpenAPIV3_1.Document;
+    const schema = null as unknown as OpenAPI.Document;
 
     await expect(
       buildToolsFromOpenApi(server, schema, client, testConfig),

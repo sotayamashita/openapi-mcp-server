@@ -217,18 +217,6 @@ export async function validateSchema(schema: any): Promise<{
     // Additional version-specific validation can be implemented here
     const versionSpecificErrors: string[] = [];
 
-    // Example: OpenAPI 3.0.0 specific validation
-    if (version === "3.0.0") {
-      // 3.0.0 specific validation logic
-      // ...
-    }
-
-    // Example: OpenAPI 3.1.0 specific validation
-    if (version === "3.1.0") {
-      // 3.1.0 specific validation logic
-      // ...
-    }
-
     return {
       valid:
         result.valid &&

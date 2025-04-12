@@ -1,37 +1,37 @@
 import { OpenApiObjectSchema, type OpenApiObject } from "./schemas/processed";
 
 /**
- * OpenAPI 3.0.0ドキュメントをパースして検証する
+ * Parse and validate an OpenAPI 3.0.0 document
  *
- * @param document OpenAPIドキュメント
- * @returns 検証されたOpenAPI 3.0.0ドキュメント
- * @throws スキーマ検証に失敗した場合
+ * @param document OpenAPI document
+ * @returns Validated OpenAPI 3.0.0 document
+ * @throws When schema validation fails
  */
 export function parseOpenApi(document: unknown): OpenApiObject {
-  // Zodスキーマを使用して検証
+  // Validate using Zod schema
   const validatedDoc = OpenApiObjectSchema.parse(document);
   return processOpenApi(validatedDoc);
 }
 
 /**
- * 検証されたOpenAPI 3.0.0ドキュメントを処理する
+ * Process a validated OpenAPI 3.0.0 document
  *
- * @param validatedDoc 検証済みのOpenAPI 3.0.0ドキュメント
- * @returns 処理されたOpenAPI 3.0.0ドキュメント
+ * @param validatedDoc Validated OpenAPI 3.0.0 document
+ * @returns Processed OpenAPI 3.0.0 document
  */
 function processOpenApi(validatedDoc: OpenApiObject): OpenApiObject {
-  // ここに追加の処理ロジックを実装
-  // 例: 参照解決、追加検証など
+  // Implement additional processing logic here
+  // Example: reference resolution, additional validation, etc.
 
   return validatedDoc;
 }
 
 /**
- * OpenAPI 3.0.0ドキュメントをパースして検証する（安全版）
- * エラーをスローせず、結果オブジェクトを返す
+ * Parse and validate an OpenAPI 3.0.0 document (safe version)
+ * Returns a result object instead of throwing errors
  *
- * @param document OpenAPIドキュメント
- * @returns 検証結果と検証されたドキュメント（成功時）
+ * @param document OpenAPI document
+ * @returns Validation result and validated document (on success)
  */
 export function safeParseOpenApi(document: unknown): {
   success: boolean;
@@ -39,7 +39,7 @@ export function safeParseOpenApi(document: unknown): {
   error?: any;
 } {
   try {
-    // Zodスキーマを使用して検証
+    // Validate using Zod schema
     const result = OpenApiObjectSchema.safeParse(document);
 
     if (result.success) {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { StdioServerTransport } from "../../src/mcp";
+import { StdioServerTransport } from "../../src/mcp/transport";
 
 describe("MCP Transport Module", () => {
   describe("Exports", () => {
