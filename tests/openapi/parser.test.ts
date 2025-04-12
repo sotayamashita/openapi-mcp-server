@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, mock } from "bun:test";
 import { loadOpenApiSpec } from "../../src/openapi/parser";
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenAPIV3_1 } from "openapi-types";
+import type { OpenAPIV3_1, OpenAPIV3 } from "openapi-types";
 
 // Create required directories before tests
 beforeAll(() => {
@@ -40,7 +40,7 @@ describe("OpenAPI Parser Module", () => {
 
       expect(schema).toBeDefined();
       expect(schema.info?.title).toBe("Test API");
-      expect(schema.openapi).toBe("3.1.0");
+      expect((schema as OpenAPIV3.Document).openapi).toBe("3.1.0");
 
       // Type-safe access
       const paths = schema.paths || {};
@@ -75,7 +75,7 @@ describe("OpenAPI Parser Module", () => {
 
       expect(schema).toBeDefined();
       expect(schema.info?.title).toBe("Test API 3.0");
-      expect(schema.openapi).toBe("3.0.0");
+      expect((schema as OpenAPIV3.Document).openapi).toBe("3.0.0");
 
       // Type-safe access
       const paths = schema.paths || {};
@@ -213,7 +213,7 @@ describe("OpenAPI Parser Module", () => {
         );
         expect(schema).toBeDefined();
         expect(schema.info?.title).toBe("URL API");
-        expect(schema.openapi).toBe("3.1.0");
+        expect((schema as OpenAPIV3.Document).openapi).toBe("3.1.0");
       } finally {
         // Restore fetch
         global.fetch = originalFetch;
@@ -248,7 +248,7 @@ describe("OpenAPI Parser Module", () => {
         );
         expect(schema).toBeDefined();
         expect(schema.info?.title).toBe("URL API 3.0");
-        expect(schema.openapi).toBe("3.0.0");
+        expect((schema as OpenAPIV3.Document).openapi).toBe("3.0.0");
       } finally {
         // Restore fetch
         global.fetch = originalFetch;
