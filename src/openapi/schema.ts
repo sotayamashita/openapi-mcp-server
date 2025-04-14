@@ -7,13 +7,13 @@ import { validate, type ErrorObject } from "@scalar/openapi-parser";
  * @returns OpenAPI version (3.0.0 or 3.1.0)
  */
 export function detectOpenApiVersion(schema: any): string {
-  // OpenAPI 3.1.0 is openapi: 3.1.x format
+  // Swagger 2.0 is openapi: 2.0 format
   if (
-    schema.openapi &&
-    typeof schema.openapi === "string" &&
-    schema.openapi.startsWith("3.1")
+    schema.swagger &&
+    typeof schema.swagger === "string" &&
+    schema.swagger.startsWith("2.0")
   ) {
-    return "3.1.0";
+    return "2.0.0";
   }
 
   // OpenAPI 3.0.0 is openapi: 3.0.x format
@@ -23,6 +23,15 @@ export function detectOpenApiVersion(schema: any): string {
     schema.openapi.startsWith("3.0")
   ) {
     return "3.0.0";
+  }
+
+  // OpenAPI 3.1.0 is openapi: 3.1.x format
+  if (
+    schema.openapi &&
+    typeof schema.openapi === "string" &&
+    schema.openapi.startsWith("3.1")
+  ) {
+    return "3.1.0";
   }
 
   // Default to 3.1.0

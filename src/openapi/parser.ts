@@ -1,8 +1,8 @@
-import { dereference } from "@scalar/openapi-parser";
-import { OpenApiObjectSchema as OpenApiObjectSchemaV3_1 } from "@scalar/openapi-types/schemas/3.1/unprocessed";
 import type { OpenAPI } from "openapi-types";
+import { dereference } from "@scalar/openapi-parser";
+import { OpenApiObjectSchema as OpenApiObjectSchemaV3_0 } from "./versions/3.0.0/schemas/processed";
+import { OpenApiObjectSchema as OpenApiObjectSchemaV3_1 } from "@scalar/openapi-types/schemas/3.1/unprocessed";
 import { validateSchema, detectOpenApiVersion } from "./schema";
-import { parseOpenApi as parseOpenApiV3_0 } from "./versions/3.0.0/parser";
 
 /**
  * Loads, parses and validates an OpenAPI specification
@@ -32,20 +32,19 @@ export async function loadOpenApiSpec(
     }
 
     // Parse and dereference schema
+    // It supports 2.0, 3.0.0 and 3.1.0
     const { schema } = await dereference(text);
 
-    // OpenAPIのバージョンを判定
+    // Detect OpenAPI version
     const version = detectOpenApiVersion(schema);
 
-    // バージョンに応じたパースと検証
+    // Parse and validate according to version
     let validatedSchema: any = schema;
     try {
       if (version === "3.1.0") {
-        // 3.1.0の場合
         validatedSchema = OpenApiObjectSchemaV3_1.parse(schema);
       } else if (version === "3.0.0") {
-        // 3.0.0の場合
-        validatedSchema = parseOpenApiV3_0(schema);
+        validatedSchema = OpenApiObjectSchemaV3_0.parse(schema);
       }
     } catch (error) {
       console.error(`OpenAPI ${version} schema parsing warnings:`, error);
@@ -75,7 +74,7 @@ export async function loadOpenApiSpec(
               "parameters",
             ].includes(method)
           ) {
-            // OpenAPIのオペレーションオブジェクトとして扱う
+            // OpenAPI operation object
             const opObj = operation as { operationId?: string };
 
             if (!opObj.operationId) {

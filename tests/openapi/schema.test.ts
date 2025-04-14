@@ -45,11 +45,9 @@ describe("OpenAPI Schema Module", () => {
 
     it("should default to 3.1.0 for unknown versions", () => {
       const schema1 = { openapi: "4.0.0" };
-      const schema2 = { swagger: "2.0" };
       const schema3 = {};
 
       expect(detectOpenApiVersion(schema1)).toBe("3.1.0");
-      expect(detectOpenApiVersion(schema2)).toBe("3.1.0");
       expect(detectOpenApiVersion(schema3)).toBe("3.1.0");
     });
   });
