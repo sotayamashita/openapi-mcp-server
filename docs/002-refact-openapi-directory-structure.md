@@ -1,5 +1,3 @@
-> status: `in-progress`
-
 # OpenAPI 関連のディレクトリ構造
 
 ## 概要

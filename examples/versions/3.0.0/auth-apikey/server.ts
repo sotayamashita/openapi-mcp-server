@@ -92,7 +92,7 @@ const app = new Elysia()
 
     // Filter resources based on access level
     const accessibleResources = apiResources.filter(
-      (resource) => resource.accessLevel <= validation.accessLevel
+      (resource) => resource.accessLevel <= validation.accessLevel,
     );
 
     return accessibleResources;
@@ -100,7 +100,7 @@ const app = new Elysia()
   .listen(3005);
 
 console.log(
-  `🦊 API Key Auth server is running at ${app.server?.hostname}:${app.server?.port}`
+  `🦊 API Key Auth server is running at ${app.server?.hostname}:${app.server?.port}`,
 );
 console.log("Available API keys:");
 Object.entries(API_KEYS).forEach(([key, info]) => {

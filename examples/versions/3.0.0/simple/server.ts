@@ -88,7 +88,7 @@ const app = new Elysia()
   .listen(3001);
 
 console.log(
-  `🦊 Simple API server is running at ${app.server?.hostname}:${app.server?.port}`
+  `🦊 Simple API server is running at ${app.server?.hostname}:${app.server?.port}`,
 );
 
 // Add some sample data

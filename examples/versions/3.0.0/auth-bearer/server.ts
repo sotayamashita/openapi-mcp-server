@@ -67,7 +67,7 @@ const app = new Elysia()
     jwt({
       name: "jwt",
       secret: JWT_SECRET,
-    })
+    }),
   )
 
   // Authentication middleware
@@ -116,7 +116,7 @@ const app = new Elysia()
       const { username, password } = body as LoginCredentials;
 
       const user = VALID_USERS.find(
-        (u) => u.username === username && u.password === password
+        (u) => u.username === username && u.password === password,
       );
 
       if (!user) {
@@ -146,7 +146,7 @@ const app = new Elysia()
         username: t.String(),
         password: t.String(),
       }),
-    }
+    },
   )
 
   // Protected data route
@@ -166,6 +166,6 @@ const app = new Elysia()
   .listen(3004);
 
 console.log(
-  `🦊 Bearer Auth API server is running at ${app.server?.hostname}:${app.server?.port}`
+  `🦊 Bearer Auth API server is running at ${app.server?.hostname}:${app.server?.port}`,
 );
 console.log(`Valid users: ${VALID_USERS.map((u) => u.username).join(", ")}`);

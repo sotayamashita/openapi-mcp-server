@@ -81,8 +81,8 @@ const app = new Elysia()
   .listen(3103);
 
 console.log(
-  `🦊 Basic Auth API server (OpenAPI 3.1.0) is running at ${app.server?.hostname}:${app.server?.port}`
+  `🦊 Basic Auth API server (OpenAPI 3.1.0) is running at ${app.server?.hostname}:${app.server?.port}`,
 );
 console.log(
-  `Use username: ${VALID_USERNAME} and password: ${VALID_PASSWORD} to authenticate`
+  `Use username: ${VALID_USERNAME} and password: ${VALID_PASSWORD} to authenticate`,
 );

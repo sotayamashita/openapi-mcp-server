@@ -88,7 +88,7 @@ const app = new Elysia()
   .listen(3101);
 
 console.log(
-  `🦊 Simple API server (OpenAPI 3.1.0) is running at ${app.server?.hostname}:${app.server?.port}`
+  `🦊 Simple API server (OpenAPI 3.1.0) is running at ${app.server?.hostname}:${app.server?.port}`,
 );
 
 // Add some sample data

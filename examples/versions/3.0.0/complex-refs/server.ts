@@ -92,7 +92,7 @@ const products: Product[] = [
       discount: {
         percentage: 10,
         validUntil: new Date(
-          Date.now() + 30 * 24 * 60 * 60 * 1000
+          Date.now() + 30 * 24 * 60 * 60 * 1000,
         ).toISOString(), // 30 days from now
       },
     },
@@ -174,5 +174,5 @@ const app = new Elysia()
   .listen(3002);
 
 console.log(
-  `🦊 Complex-Refs API server is running at ${app.server?.hostname}:${app.server?.port}`
+  `🦊 Complex-Refs API server is running at ${app.server?.hostname}:${app.server?.port}`,
 );
