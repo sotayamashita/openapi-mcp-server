@@ -6,26 +6,19 @@ The openapi-mcp-server is a powerful bridge between OpenAPI specifications and A
 
 ## Features
 
-🔌 **OpenAPI Integration**
-
-- Automatically converts OpenAPI/Swagger specifications into MCP tools
-
-🧩 **Parameter Validation**
-
-- Automatically validates API parameters using Zod
-
-📚 **Multiple OpenAPI Versions**
-
-- Support for OpenAPI v3.0.0 and v3.1.0
-
-🔐 **Authentication Support**:
-
-- HTTP authentication schemes:
-  - Basic authentication
-  - Bearer token authentication (JWT)
-  - Other HTTP schemes as defined by [RFC 7235](https://tools.ietf.org/html/rfc7235)
-- API keys:
-  - Header-based API keys
+- 🔌 **OpenAPI Integration**
+  - Automatically converts OpenAPI/Swagger specifications into MCP tools
+- 🧩 **Parameter Validation**
+  - Automatically validates API parameters using Zod
+- 📚 **Multiple OpenAPI Versions**
+  - Support for OpenAPI v3.0.0 and v3.1.0
+- 🔐 **Authentication Support**:
+  - HTTP authentication schemes:
+    - Basic authentication
+    - Bearer token authentication (JWT)
+    - Other HTTP schemes as defined by [RFC 7235](https://tools.ietf.org/html/rfc7235)
+  - API keys:
+    - Header-based API keys
 
 ## Limitations
 
@@ -136,6 +129,31 @@ To use this MCP server with Cursor as Global:
    ```
 
 For more detailed instructions, see the [Cursor's Model Context Protocol](https://docs.cursor.com/context/model-context-protocol#mcp-resources).
+
+## Best Practices
+
+### OpenAPI/Swagger Specifications
+
+#### Use Descriptive `operationId` Fields
+
+The `operationId` field in your OpenAPI/Swagger specification plays a crucial role in how tools are presented to AI assistants. When converting your API to MCP tools:
+
+- **Tool Naming**: The `operationId` is used directly as the MCP tool name
+- **Clarity**: Descriptive `operationId` values make it easier for AI assistants to understand and use your API
+- **Consistency**: Use a consistent naming pattern (e.g., `getUser`, `createUser`, `updateUserPassword`)
+
+Example of a well-defined operation:
+
+```yaml
+paths:
+  /users/{userId}:
+    get:
+      operationId: getUserById
+      summary: Retrieve user information
+      description: Returns detailed information about a specific user
+```
+
+Without an `operationId`, the server attempts to generate a name using the HTTP method and path, but this is less descriptive and may lead to less intuitive tool names for AI assistants.
 
 ## Development
 
