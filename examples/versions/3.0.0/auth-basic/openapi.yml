@@ -1,0 +1,60 @@
+openapi: 3.0.0
+info:
+  title: Basic Auth API Example
+  version: 1.0.0
+  description: An API example with Basic authentication
+servers:
+  - url: http://localhost:3003
+    description: Local development server
+
+security:
+  - basicAuth: []
+
+paths:
+  /secure-resources:
+    get:
+      summary: Get secure resources
+      description: Returns a list of secure resources (requires Basic auth)
+      operationId: getSecureResources
+      responses:
+        "200":
+          description: A list of secure resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SecureResource"
+        "401":
+          description: Unauthorized - Authentication credentials are missing or invalid
+        "403":
+          description: Forbidden - Authentication succeeded but the authenticated user doesn't have access to the resource
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Basic authentication with username and password
+
+  schemas:
+    SecureResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        confidentialData:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - confidentialData
+        - createdAt
