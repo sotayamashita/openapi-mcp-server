@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, spyOn } from "bun:test";
 import { parseCliArgs } from "../../src/cli/args";
-import * as util from "util";
+import * as util from "node:util";
 
 describe("CLI Arguments Parser", () => {
   // Store mock

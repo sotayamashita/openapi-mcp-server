@@ -1,4 +1,4 @@
-import { parseArgs } from "util";
+import { parseArgs } from "node:util";
 
 /**
  * Command line argument options type definition
@@ -14,11 +14,11 @@ export interface CliOptions {
  * Parse command line arguments and return CliOptions
  * @returns Parsed command line arguments object
  * @throws Error if required arguments are missing
- * @see https://bun.sh/guides/process/argv
+ * @see https://nodejs.org/api/util.html#utilparseargsconfig
  */
 export function parseCliArgs(): CliOptions {
   const { values } = parseArgs({
-    args: Bun.argv,
+    args: process.argv,
     options: {
       api: {
         type: "string",
