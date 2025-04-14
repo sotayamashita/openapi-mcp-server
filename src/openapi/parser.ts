@@ -1,7 +1,8 @@
+import type { OpenAPI } from "openapi-types";
 import { dereference } from "@scalar/openapi-parser";
+import { OpenApiObjectSchema as OpenApiObjectSchemaV3_0 } from "./versions/3.0.0/schemas/processed";
 import { OpenApiObjectSchema as OpenApiObjectSchemaV3_1 } from "@scalar/openapi-types/schemas/3.1/unprocessed";
-import type { OpenAPIV3_1 } from "openapi-types";
-import { validateSchema } from "./schema";
+import { validateSchema, detectOpenApiVersion } from "./schema";
 
 /**
  * Loads, parses and validates an OpenAPI specification
@@ -11,7 +12,7 @@ import { validateSchema } from "./schema";
  */
 export async function loadOpenApiSpec(
   specPath: string,
-): Promise<OpenAPIV3_1.Document> {
+): Promise<OpenAPI.Document> {
   if (!specPath) {
     throw new Error("OpenAPI specification path cannot be empty");
   }
@@ -31,14 +32,22 @@ export async function loadOpenApiSpec(
     }
 
     // Parse and dereference schema
+    // It supports 2.0, 3.0.0 and 3.1.0
     const { schema } = await dereference(text);
 
-    // Validate schema
+    // Detect OpenAPI version
+    const version = detectOpenApiVersion(schema);
+
+    // Parse and validate according to version
     let validatedSchema: any = schema;
     try {
-      validatedSchema = OpenApiObjectSchemaV3_1.parse(schema);
+      if (version === "3.1.0") {
+        validatedSchema = OpenApiObjectSchemaV3_1.parse(schema);
+      } else if (version === "3.0.0") {
+        validatedSchema = OpenApiObjectSchemaV3_0.parse(schema);
+      }
     } catch (error) {
-      console.error("OpenAPI schema parsing warnings:", error);
+      console.error(`OpenAPI ${version} schema parsing warnings:`, error);
       // Continue with the original schema
     }
 
@@ -65,7 +74,7 @@ export async function loadOpenApiSpec(
               "parameters",
             ].includes(method)
           ) {
-            // OpenAPIのオペレーションオブジェクトとして扱う
+            // OpenAPI operation object
             const opObj = operation as { operationId?: string };
 
             if (!opObj.operationId) {
@@ -82,7 +91,7 @@ export async function loadOpenApiSpec(
       }
     }
 
-    return validatedSchema as OpenAPIV3_1.Document;
+    return validatedSchema as OpenAPI.Document;
   } catch (error: any) {
     throw new Error(`Failed to parse OpenAPI spec: ${error.message}`);
   }

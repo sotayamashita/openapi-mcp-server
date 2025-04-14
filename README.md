@@ -6,8 +6,32 @@ The openapi-mcp-server is a powerful bridge between OpenAPI specifications and A
 
 ## Features
 
-🔌 **OpenAPI Integration** - Automatically converts OpenAPI/Swagger specifications into MCP tools  
-🧩 **Parameter Validation** - Automatically validates API parameters using Zod
+- 🔌 **OpenAPI Integration**
+  - Automatically converts OpenAPI/Swagger specifications into MCP tools
+- 🧩 **Parameter Validation**
+  - Automatically validates API parameters using Zod
+- 📚 **Multiple OpenAPI Versions**
+  - Support for OpenAPI v3.0.0 and v3.1.0
+- 🔐 **Authentication Support**:
+  - HTTP authentication schemes:
+    - Basic authentication
+    - Bearer token authentication (JWT)
+    - Other HTTP schemes as defined by [RFC 7235](https://tools.ietf.org/html/rfc7235)
+  - API keys:
+    - Header-based API keys
+
+## Limitations
+
+⚠️ **Version Support**:
+
+- [ ] OpenAPI v2.0 (Swagger) is not currently supported
+
+⚠️ **Authentication Limitations**:
+
+- [ ] OAuth 2.0 authentication is not supported
+- [ ] OpenID Connect Discovery is not supported
+- [ ] Query parameter-based API keys are not supported
+- [ ] Cookie-based authentication is not supported
 
 ## Installation
 
@@ -106,6 +130,31 @@ To use this MCP server with Cursor as Global:
 
 For more detailed instructions, see the [Cursor's Model Context Protocol](https://docs.cursor.com/context/model-context-protocol#mcp-resources).
 
+## Best Practices
+
+### OpenAPI/Swagger Specifications
+
+#### Use Descriptive `operationId` Fields
+
+The `operationId` field in your OpenAPI/Swagger specification plays a crucial role in how tools are presented to AI assistants. When converting your API to MCP tools:
+
+- **Tool Naming**: The `operationId` is used directly as the MCP tool name
+- **Clarity**: Descriptive `operationId` values make it easier for AI assistants to understand and use your API
+- **Consistency**: Use a consistent naming pattern (e.g., `getUser`, `createUser`, `updateUserPassword`)
+
+Example of a well-defined operation:
+
+```yaml
+paths:
+  /users/{userId}:
+    get:
+      operationId: getUserById
+      summary: Retrieve user information
+      description: Returns detailed information about a specific user
+```
+
+Without an `operationId`, the server attempts to generate a name using the HTTP method and path, but this is less descriptive and may lead to less intuitive tool names for AI assistants.
+
 ## Development
 
 ### Development Commands
@@ -135,35 +184,4 @@ bun run format
 
 ### Codebase Structure
 
-The codebase follows a modular organization pattern with clear separation of concerns:
-
-```
-src/
-├── cli/              # Command-line interface
-│   ├── args.ts       # CLI arguments processing
-│   └── index.ts      # CLI entry point
-├── config/           # Configuration management
-│   └── index.ts      # Environment variables and settings
-├── mcp/              # MCP protocol implementation
-│   ├── server.ts     # MCP server core functionality
-│   └── transport.ts  # Transport layer abstraction
-├── openapi/          # OpenAPI specification handling
-│   ├── client.ts     # OpenAPI client generation
-│   ├── parser.ts     # Spec parsing and validation
-│   └── schema.ts     # Schema validation and conversion
-├── tools/            # MCP tools management
-│   ├── builder.ts    # Tool generation from OpenAPI
-│   └── executor.ts   # Tool execution and response handling
-├── types/            # Type definitions
-│   └── index.ts      # Common type declarations
-└── index.ts          # Application entry point
-```
-
-### Module Responsibilities
-
-- **CLI Module**: Handles command-line arguments and user interaction
-- **Config Module**: Manages environment variables (BASE_URL, HEADERS) and configuration validation
-- **MCP Module**: Implements the Model Context Protocol server and transport layers
-- **OpenAPI Module**: Processes OpenAPI specifications, generates clients, and validates schemas
-- **Tools Module**: Converts OpenAPI operations to MCP tools and handles their execution
-- **Types Module**: Provides common type definitions across the application
+For details on the codebase structure and module responsibilities, see [Codebase Structure](./docs/codebase-structure.md).

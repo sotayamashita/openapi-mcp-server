@@ -1,9 +1,14 @@
 import { describe, it, expect, mock, spyOn } from "bun:test";
 import { buildToolsFromOpenApi } from "../../src/tools/builder";
+import {
+  buildParameterSchema,
+  findOperationById,
+} from "../../src/tools/builder";
 import { McpServer } from "../../src/mcp/server";
-import type { OpenAPIV3_1 } from "openapi-types";
+import type { OpenAPI } from "openapi-types";
 import type { ServerConfig } from "../../src/config";
-import type { ToolResponse } from "../../src/types";
+import type { Operation } from "../../src/types";
+import { detectOpenApiVersion } from "../../src/openapi/schema";
 
 // Mock implementation of McpServer
 const createMockServer = () => {
@@ -43,9 +48,9 @@ const createMockClient = () => {
 };
 
 // Test OpenAPI schema
-const createTestSchema = (): OpenAPIV3_1.Document => {
+const createTestSchema = (version = "3.1.0"): OpenAPI.Document => {
   return {
-    openapi: "3.1.0",
+    openapi: version,
     info: {
       title: "Test API",
       version: "1.0.0",
@@ -76,12 +81,39 @@ const createTestSchema = (): OpenAPIV3_1.Document => {
         },
       },
       "/users/{id}": {
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
         get: {
           operationId: "getUserById",
+          responses: {},
+        },
+      },
+    },
+  };
+};
+
+// Create test schema with webhooks (OpenAPI 3.1.0 only)
+const createTestSchemaWithWebhooks = (): OpenAPI.Document => {
+  const schema = createTestSchema("3.1.0");
+  return {
+    ...schema,
+    webhooks: {
+      "new-user": {
+        post: {
+          operationId: "webhookNewUser",
+          description: "Webhook for new user creation",
           parameters: [
             {
-              name: "id",
-              in: "path",
+              name: "token",
+              in: "header",
               required: true,
               schema: {
                 type: "string",
@@ -102,6 +134,18 @@ const testConfig: ServerConfig = {
     "Content-Type": "application/json",
   },
 };
+
+// 3.1.0のコンテンツベースのパラメータタイプ
+interface ContentBasedParameter {
+  name: string;
+  in: "query" | "path" | "header" | "cookie" | "body";
+  required?: boolean;
+  content: {
+    [mediaType: string]: {
+      schema?: any;
+    };
+  };
+}
 
 describe("Tools Builder Module", () => {
   it("should build tools from OpenAPI schema", async () => {
@@ -135,6 +179,10 @@ describe("Tools Builder Module", () => {
     const getUsersTool = server.getTools().get("getUsers");
     expect(getUsersTool.description).toBe("Get a list of users");
     expect(Object.keys(getUsersTool.paramSchema)).toContain("limit");
+
+    // Verify path-level parameters are included
+    const getUserByIdTool = server.getTools().get("getUserById");
+    expect(Object.keys(getUserByIdTool.paramSchema)).toContain("id");
 
     // Reset spies
     consoleErrorSpy.mockRestore();
@@ -176,10 +224,293 @@ describe("Tools Builder Module", () => {
     const client = createMockClient();
 
     // Set schema to null to trigger error
-    const schema = null as unknown as OpenAPIV3_1.Document;
+    const schema = null as unknown as OpenAPI.Document;
 
     await expect(
       buildToolsFromOpenApi(server, schema, client, testConfig),
     ).rejects.toThrow(/Failed to build tools from OpenAPI schema/);
+  });
+
+  describe("buildParameterSchema", () => {
+    it("should build parameter schema from operation parameters", () => {
+      const operation: Operation = {
+        operationId: "testOperation",
+        parameters: [
+          {
+            name: "limit",
+            in: "query",
+            required: true,
+            schema: {
+              type: "integer",
+            },
+          },
+          {
+            name: "filter",
+            in: "query",
+            required: false,
+            schema: {
+              type: "string",
+            },
+          },
+          {
+            name: "tags",
+            in: "query",
+            required: false,
+            schema: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+          },
+          {
+            name: "active",
+            in: "query",
+            required: false,
+            schema: {
+              type: "boolean",
+            },
+          },
+        ],
+      };
+
+      // Get API version (OpenAPI 3.0.0 for default test)
+      const apiVersion = "3.0.0";
+      const paramSchema = buildParameterSchema(operation, apiVersion);
+
+      // Verify all parameters are included
+      expect(Object.keys(paramSchema)).toContain("limit");
+      expect(Object.keys(paramSchema)).toContain("filter");
+      expect(Object.keys(paramSchema)).toContain("tags");
+      expect(Object.keys(paramSchema)).toContain("active");
+
+      // Verify required and optional parameters
+      expect(paramSchema.limit.isOptional()).toBe(false);
+      expect(paramSchema.filter.isOptional()).toBe(true);
+    });
+
+    it("should handle OpenAPI 3.0.0 parameters correctly", () => {
+      // OpenAPI 3.0.0 path parameters
+      const operation: Operation = {
+        operationId: "getUserById",
+        parameters: [
+          {
+            name: "userId",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+            },
+          },
+        ],
+      };
+
+      const paramSchema = buildParameterSchema(operation, "3.0.0");
+
+      // Verify parameters are correctly parsed
+      expect(Object.keys(paramSchema)).toContain("userId");
+      expect(paramSchema.userId.isOptional()).toBe(false);
+    });
+
+    it("should handle OpenAPI 3.1.0 content-based parameters correctly", () => {
+      // OpenAPI 3.1.0 content-based parameter
+      const operation: Operation = {
+        operationId: "searchItems",
+        parameters: [
+          {
+            name: "filter",
+            in: "query",
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    category: { type: "string" },
+                  },
+                },
+              },
+            },
+          } as ContentBasedParameter,
+        ],
+      };
+
+      const paramSchema = buildParameterSchema(operation, "3.1.0");
+
+      // Verify content-based parameter is correctly parsed
+      expect(Object.keys(paramSchema)).toContain("filter");
+      expect(paramSchema.filter.isOptional()).toBe(false);
+    });
+
+    it("should handle requestBody correctly", () => {
+      const operation: Operation = {
+        operationId: "createUser",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  email: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const paramSchema = buildParameterSchema(operation, "3.1.0");
+
+      // Verify body parameter is included
+      expect(Object.keys(paramSchema)).toContain("body");
+    });
+
+    it("should handle empty parameters", () => {
+      const operation: Operation = {
+        operationId: "emptyParams",
+        // No parameters
+      };
+
+      const paramSchema = buildParameterSchema(operation, "3.0.0");
+
+      // Verify empty object is returned
+      expect(Object.keys(paramSchema).length).toBe(0);
+    });
+
+    it("should handle parameters without schema", () => {
+      const operation: Operation = {
+        operationId: "testOperation",
+        parameters: [
+          {
+            name: "query",
+            in: "query",
+            required: true,
+            // No schema property
+          },
+        ],
+      };
+
+      const paramSchema = buildParameterSchema(operation, "3.0.0");
+
+      // Verify parameter is included
+      expect(Object.keys(paramSchema)).toContain("query");
+    });
+  });
+
+  describe("findOperationById", () => {
+    it("should find operation and include path-level parameters", () => {
+      // Skip if findOperationById is not exported
+      if (!findOperationById) {
+        console.warn("findOperationById is not exported, skipping test");
+        return;
+      }
+
+      const schema = createTestSchema();
+      const apiVersion = detectOpenApiVersion(schema);
+      const operation = findOperationById(schema, "getUserById", apiVersion);
+
+      // Verify operation was found
+      expect(operation).toBeDefined();
+      expect(operation?.operationId).toBe("getUserById");
+      expect(operation?.path).toBe("/users/{id}");
+
+      // Verify path parameters were included
+      expect(operation?.parameters).toBeDefined();
+      expect(operation?.parameters?.length).toBe(1);
+      expect(operation?.parameters?.[0].name).toBe("id");
+      expect(operation?.parameters?.[0].in).toBe("path");
+      expect(operation?.parameters?.[0].required).toBe(true);
+    });
+
+    it("should merge path-level and operation-level parameters", () => {
+      // Skip if findOperationById is not exported
+      if (!findOperationById) {
+        console.warn("findOperationById is not exported, skipping test");
+        return;
+      }
+
+      // Create schema with both path and operation parameters
+      const schema: OpenAPI.Document = {
+        openapi: "3.1.0",
+        info: { title: "Test API", version: "1.0.0" },
+        paths: {
+          "/items/{itemId}": {
+            parameters: [
+              {
+                name: "itemId",
+                in: "path",
+                required: true,
+                schema: { type: "string" },
+              },
+            ],
+            get: {
+              operationId: "getItemById",
+              parameters: [
+                {
+                  name: "fields",
+                  in: "query",
+                  required: false,
+                  schema: { type: "string" },
+                },
+              ],
+              responses: {}, // Add empty responses object to satisfy OpenAPI.OperationObject
+            },
+          },
+        },
+      };
+
+      const apiVersion = detectOpenApiVersion(schema);
+      const operation = findOperationById(schema, "getItemById", apiVersion);
+
+      // Verify operation was found
+      expect(operation).toBeDefined();
+
+      // Verify both parameters were included
+      expect(operation?.parameters).toBeDefined();
+      expect(operation?.parameters?.length).toBe(2);
+
+      // Find parameters by name
+      const pathParam = operation?.parameters?.find(
+        (p: any) => p.name === "itemId",
+      );
+      const queryParam = operation?.parameters?.find(
+        (p: any) => p.name === "fields",
+      );
+
+      expect(pathParam).toBeDefined();
+      expect(pathParam?.in).toBe("path");
+      expect(pathParam?.required).toBe(true);
+
+      expect(queryParam).toBeDefined();
+      expect(queryParam?.in).toBe("query");
+      expect(queryParam?.required).toBe(false);
+    });
+
+    it("should find operations in webhooks for OpenAPI 3.1.0", () => {
+      // Skip if findOperationById is not exported
+      if (!findOperationById) {
+        console.warn("findOperationById is not exported, skipping test");
+        return;
+      }
+
+      const schema = createTestSchemaWithWebhooks();
+      const apiVersion = detectOpenApiVersion(schema);
+      const operation = findOperationById(schema, "webhookNewUser", apiVersion);
+
+      // Verify webhook operation was found
+      expect(operation).toBeDefined();
+      expect(operation?.operationId).toBe("webhookNewUser");
+      expect(operation?.path).toContain("webhook:");
+      expect(operation?.method).toBe("post");
+
+      // Verify webhook parameters were included
+      expect(operation?.parameters).toBeDefined();
+      expect(operation?.parameters?.length).toBe(1);
+      expect(operation?.parameters?.[0].name).toBe("token");
+      expect(operation?.parameters?.[0].in).toBe("header");
+    });
   });
 });

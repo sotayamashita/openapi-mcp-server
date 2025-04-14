@@ -2,6 +2,43 @@ import { z } from "zod";
 import { validate, type ErrorObject } from "@scalar/openapi-parser";
 
 /**
+ * Detects the OpenAPI version
+ * @param schema OpenAPI schema
+ * @returns OpenAPI version (3.0.0 or 3.1.0)
+ */
+export function detectOpenApiVersion(schema: any): string {
+  // Swagger 2.0 is openapi: 2.0 format
+  if (
+    schema.swagger &&
+    typeof schema.swagger === "string" &&
+    schema.swagger.startsWith("2.0")
+  ) {
+    return "2.0.0";
+  }
+
+  // OpenAPI 3.0.0 is openapi: 3.0.x format
+  if (
+    schema.openapi &&
+    typeof schema.openapi === "string" &&
+    schema.openapi.startsWith("3.0")
+  ) {
+    return "3.0.0";
+  }
+
+  // OpenAPI 3.1.0 is openapi: 3.1.x format
+  if (
+    schema.openapi &&
+    typeof schema.openapi === "string" &&
+    schema.openapi.startsWith("3.1")
+  ) {
+    return "3.1.0";
+  }
+
+  // Default to 3.1.0
+  return "3.1.0";
+}
+
+/**
  * Interface for creating Zod schema from OpenAPI parameters
  */
 export interface OpenApiParameter {
@@ -165,6 +202,7 @@ export function validateOperationIds(schema: any): {
 /**
  * Validates OpenAPI schema
  * Uses @scalar/openapi-parser's validate function
+ * Validates schema based on version
  *
  * @param schema OpenAPI schema to validate
  * @returns Validation result (including error information if any) and alternative operation IDs
@@ -175,14 +213,25 @@ export async function validateSchema(schema: any): Promise<{
   alternativeIds: Record<string, string>;
 }> {
   try {
+    // Detect schema version
+    const version = detectOpenApiVersion(schema);
+
+    // Validate schema using @scalar/openapi-parser
+    // Note: This library supports both 3.1.0 and 3.0.0
     const result = await validate(schema);
 
     // Additional validation for operation ID uniqueness
     const { errors: idErrors, alternativeIds } = validateOperationIds(schema);
 
+    // Additional version-specific validation can be implemented here
+    const versionSpecificErrors: string[] = [];
+
     return {
-      valid: result.valid && idErrors.length === 0,
-      errors: [...(result.errors || []), ...idErrors],
+      valid:
+        result.valid &&
+        idErrors.length === 0 &&
+        versionSpecificErrors.length === 0,
+      errors: [...(result.errors || []), ...idErrors, ...versionSpecificErrors],
       alternativeIds,
     };
   } catch (error: any) {

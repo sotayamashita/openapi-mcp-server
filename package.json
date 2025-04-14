@@ -5,8 +5,8 @@
     "commit": "cz",
     "prepare": "husky",
     "start": "concurrently --kill-others \"bun run start:server\" \"bun run start:inspector\"",
-    "start:server": "bun run demo/server.ts",
-    "start:inspector": "bunx @modelcontextprotocol/inspector bun run src/index.ts --api ./demo/openapi.yml",
+    "start:server": "bun run examples/versions/3.0.0/auth-apikey/server.ts",
+    "start:inspector": "bunx @modelcontextprotocol/inspector -e BASE_URL=http://localhost:3005 bun run src/index.ts --api examples/versions/3.0.0/auth-apikey/openapi.yml",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
@@ -39,13 +39,18 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
+    "@elysiajs/cors": "^1.2.0",
+    "@elysiajs/jwt": "^1.2.0",
     "@types/bun": "latest",
+    "@types/js-yaml": "^4.0.9",
     "commitizen": "^4.3.1",
     "concurrently": "^9.1.2",
     "cz-conventional-changelog": "^3.3.0",
+    "elysia": "^1.2.25",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "uuid": "^11.1.0"
   },
   "peerDependencies": {
     "typescript": "^5"

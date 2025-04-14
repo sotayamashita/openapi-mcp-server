@@ -1,11 +1,11 @@
 import type { ZodType } from "zod";
 
 /**
- * MCP タイプの定義
+ * MCP Type Definitions
  */
 
 /**
- * MCPツールのコンテンツ型
+ * MCP Tool Content Type
  */
 export interface ToolContentItem {
   type: string;
@@ -14,7 +14,7 @@ export interface ToolContentItem {
 }
 
 /**
- * MCPツールのレスポンス型
+ * MCP Tool Response Type
  */
 export interface ToolResponse {
   content: ToolContentItem[];
@@ -22,22 +22,22 @@ export interface ToolResponse {
 }
 
 /**
- * ツール実行関数の型
- * パラメータを受け取り、ToolResponseを返すPromiseを返す関数
+ * Tool Execution Function Type
+ * A function that takes parameters and returns a Promise of ToolResponse
  */
 export type ToolExecutor<T extends Record<string, any>> = (
   params: T,
 ) => Promise<ToolResponse>;
 
 /**
- * MCP SDK互換のツール関数型
+ * MCP SDK Compatible Tool Function Type
  */
 export type ToolFunction = (
   params: Record<string, any>,
 ) => Promise<ToolResponse>;
 
 /**
- * パラメータの型
+ * Parameter Type
  */
 export interface Parameter {
   name: string;
@@ -48,7 +48,7 @@ export interface Parameter {
 }
 
 /**
- * OpenAPIオペレーション型
+ * OpenAPI Operation Type
  */
 export interface Operation {
   operationId?: string;

@@ -1,0 +1,113 @@
+openapi: 3.1.0
+info:
+  title: Bearer Token Auth API Example
+  version: 1.0.0
+  description: An API example with Bearer token authentication
+servers:
+  - url: http://localhost:3104
+    description: Local development server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      summary: Login to get access token
+      description: Returns a JWT token for authentication
+      operationId: login
+      security: [] # No auth required for login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginCredentials"
+      responses:
+        "200":
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "401":
+          description: Invalid credentials
+
+  /protected-data:
+    get:
+      summary: Get protected data
+      description: Returns protected data (requires Bearer token)
+      operationId: getProtectedData
+      responses:
+        "200":
+          description: Protected data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProtectedData"
+        "401":
+          description: Unauthorized - Missing or invalid token
+        "403":
+          description: Forbidden - Valid token but insufficient permissions
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT-based authentication with bearer token
+
+  schemas:
+    LoginCredentials:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+      required:
+        - username
+        - password
+
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expiresIn:
+          type: integer
+          format: int32
+          description: Expiration time in seconds
+        tokenType:
+          type: string
+          enum: [Bearer]
+          default: Bearer
+      required:
+        - token
+        - expiresIn
+        - tokenType
+
+    ProtectedData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        sensitive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - content
+        - createdAt

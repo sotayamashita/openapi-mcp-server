@@ -5,10 +5,8 @@ import {
 } from "../../src/openapi/client";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { ServerConfig } from "../../src/config";
-import path from "node:path";
-import fs from "node:fs";
 
-// openapi-client-axiosモジュールをモック
+// Mock openapi-client-axios module
 mock.module("openapi-client-axios", () => {
   return {
     OpenAPIClientAxios: function (options: any) {
@@ -20,12 +18,12 @@ mock.module("openapi-client-axios", () => {
   };
 });
 
-// テスト用のOpenAPIドキュメント
-const createTestSchema = (): OpenAPIV3_1.Document => {
+// Test OpenAPI 3.1.0 document
+const createTestSchema = (version = "3.1.0"): OpenAPIV3_1.Document => {
   return {
-    openapi: "3.1.0",
+    openapi: version,
     info: {
-      title: "Test API",
+      title: `Test API ${version}`,
       version: "1.0.0",
     },
     paths: {
@@ -59,7 +57,7 @@ const createTestSchema = (): OpenAPIV3_1.Document => {
       },
       "/products": {
         get: {
-          // operationIdなし
+          // No operationId
           responses: {
             "200": {
               description: "OK",
@@ -72,7 +70,7 @@ const createTestSchema = (): OpenAPIV3_1.Document => {
   };
 };
 
-// テスト用のサーバー設定
+// Test server configuration
 const testConfig: ServerConfig = {
   baseUrl: "https://test-api.example.com",
   headers: {
@@ -83,17 +81,26 @@ const testConfig: ServerConfig = {
 
 describe("OpenAPI Client Module", () => {
   describe("createOpenApiClient", () => {
-    it("should create a client with correct configuration", async () => {
-      const schema = createTestSchema();
+    it("should create a client with OpenAPI 3.1.0 schema", async () => {
+      const schema = createTestSchema("3.1.0");
       const client = await createOpenApiClient(schema, testConfig);
 
-      // クライアントが作成されることを確認
+      // Verify client is created
+      expect(client).toBeDefined();
+      expect(client.api).toBeDefined();
+    });
+
+    it("should create a client with OpenAPI 3.0.0 schema", async () => {
+      const schema = createTestSchema("3.0.0");
+      const client = await createOpenApiClient(schema, testConfig);
+
+      // Verify client is created
       expect(client).toBeDefined();
       expect(client.api).toBeDefined();
     });
 
     it("should throw an error when client initialization fails", async () => {
-      // 一時的にOpenAPIClientAxiosを失敗させるようにモック
+      // Temporarily mock OpenAPIClientAxios to fail
       mock.module("openapi-client-axios", () => {
         return {
           OpenAPIClientAxios: function () {
@@ -114,8 +121,18 @@ describe("OpenAPI Client Module", () => {
   });
 
   describe("extractOperationIds", () => {
-    it("should extract all operation IDs from schema", () => {
-      const schema = createTestSchema();
+    it("should extract all operation IDs from OpenAPI 3.1.0 schema", () => {
+      const schema = createTestSchema("3.1.0");
+      const operationIds = extractOperationIds(schema);
+
+      expect(operationIds).toBeArrayOfSize(3);
+      expect(operationIds).toContain("getUsers");
+      expect(operationIds).toContain("createUser");
+      expect(operationIds).toContain("getUserById");
+    });
+
+    it("should extract all operation IDs from OpenAPI 3.0.0 schema", () => {
+      const schema = createTestSchema("3.0.0");
       const operationIds = extractOperationIds(schema);
 
       expect(operationIds).toBeArrayOfSize(3);
@@ -140,22 +157,22 @@ describe("OpenAPI Client Module", () => {
     it("should handle operations without operationId", () => {
       const schema = createTestSchema();
 
-      // pathsオブジェクトを取得し、productsパスのgetオペレーションにアクセス
+      // Get paths object and access get operation of products path
       const paths = schema.paths || {};
       const productsPath = paths["/products"] as OpenAPIV3_1.PathItemObject;
       const getOperation = productsPath?.get as OpenAPIV3_1.OperationObject;
 
-      // operationIdが含まれていないことを確認
+      // Verify operationId is not included
       expect(getOperation).toBeDefined();
       expect(getOperation.operationId).toBeUndefined();
 
-      // operationIdsが3つだけ（operationIdがあるもののみ）抽出されることを確認
+      // Verify only 3 operationIds are extracted (only those with operationId)
       const operationIds = extractOperationIds(schema);
       expect(operationIds).toBeArrayOfSize(3);
     });
 
     it("should handle non-operation fields in path item", () => {
-      // パスアイテム内の操作ではないフィールドを含むスキーマ
+      // Schema with non-operation fields in path item
       const schema: OpenAPIV3_1.Document = {
         openapi: "3.1.0",
         info: {
