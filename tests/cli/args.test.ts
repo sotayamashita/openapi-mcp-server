@@ -1,66 +1,57 @@
-import { describe, it, expect, afterEach, spyOn } from "bun:test";
-import { parseCliArgs } from "../../src/cli/args";
-import * as util from "util";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { parseCliArgs, type CliOptions } from "../../src/cli/args";
 
-describe("CLI Arguments Parser", () => {
-  // Store mock
-  let parseArgsSpy: any;
+describe("parseCliArgs", () => {
+  const originalArgv = process.argv;
+  let errorMock: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    // Mock console.error to suppress output during tests and allow checks
+    errorMock = vi.spyOn(console, "error").mockImplementation(() => {});
+    // Reset argv before each test
+    process.argv = [...originalArgv.slice(0, 2)]; // Keep node executable and script path
+  });
 
   afterEach(() => {
-    // Reset state after test
-    if (parseArgsSpy) {
-      parseArgsSpy.mockRestore();
-    }
+    // Restore original implementations after each test
+    vi.restoreAllMocks();
+    process.argv = originalArgv;
   });
 
-  it("should correctly parse file path with --api argument", () => {
-    // Mock node:util's parseArgs function
-    parseArgsSpy = spyOn(util, "parseArgs").mockImplementation(() => {
-      return {
-        values: { api: "test-openapi.json" },
-        positionals: [],
-      } as any;
-    });
+  it("parses file path provided with --api argument", () => {
+    const specPath = "./openapi.yaml";
+    process.argv.push("--api", specPath);
 
-    // Execute the function under test
-    const result = parseCliArgs();
-
-    // Verify results
-    expect(result.openApiSpecPath).toBe("test-openapi.json");
-    expect(parseArgsSpy).toHaveBeenCalled();
-    expect(parseArgsSpy).toHaveBeenCalledTimes(1);
+    const options: CliOptions = parseCliArgs();
+    expect(options).toEqual({ openApiSpecPath: specPath });
   });
 
-  it("should correctly parse URL with --api argument", () => {
-    // Mock node:util's parseArgs function
-    parseArgsSpy = spyOn(util, "parseArgs").mockImplementation(() => {
-      return {
-        values: { api: "https://example.com/openapi.json" },
-        positionals: [],
-      } as any;
-    });
+  it("parses URL provided with --api argument", () => {
+    const specUrl = "https://example.com/openapi.yaml";
+    process.argv.push("--api", specUrl);
 
-    // Execute the function under test
-    const result = parseCliArgs();
-
-    // Verify results
-    expect(result.openApiSpecPath).toBe("https://example.com/openapi.json");
-    expect(parseArgsSpy).toHaveBeenCalled();
+    const options: CliOptions = parseCliArgs();
+    expect(options).toEqual({ openApiSpecPath: specUrl });
   });
 
-  it("should throw error when --api argument is missing", () => {
-    // Mock node:util's parseArgs function (without api argument)
-    parseArgsSpy = spyOn(util, "parseArgs").mockImplementation(() => {
-      return {
-        values: {}, // no api argument
-        positionals: [],
-      } as any;
-    });
+  it("handles equals sign format (--api=value)", () => {
+    const specPath = "https://example.com/spec.json";
+    process.argv.push(`--api=${specPath}`);
 
-    // Verify error is thrown
+    const options: CliOptions = parseCliArgs();
+    expect(options).toEqual({ openApiSpecPath: specPath });
+  });
+
+  it("throws error when --api argument is missing", () => {
     expect(() => parseCliArgs()).toThrow(
-      "OpenAPI specification path is required",
+      "The --api=<spec_path_or_url> argument is required.",
     );
-    expect(parseArgsSpy).toHaveBeenCalled();
+  });
+
+  it("throws error when --api argument has no value", () => {
+    process.argv.push("--api");
+    expect(() => parseCliArgs()).toThrow(
+      "Option '--api <value>' argument missing",
+    );
   });
 });

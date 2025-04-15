@@ -4,15 +4,7 @@
   "scripts": {
     "commit": "cz",
     "prepare": "husky",
-    "start": "concurrently --kill-others \"bun run start:server\" \"bun run start:inspector\"",
-    "start:server": "bun run examples/versions/3.0.0/auth-apikey/server.ts",
-    "start:inspector": "bunx @modelcontextprotocol/inspector -e BASE_URL=http://localhost:3005 bun run src/index.ts --api examples/versions/3.0.0/auth-apikey/openapi.yml",
-    "test": "bun test",
-    "test:watch": "bun test --watch",
-    "test:coverage": "bun test --coverage",
-    "test:coverage:lcov": "bun test --coverage --coverage-reporter=lcov",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "test": "vitest tests/cli"
   },
   "lint-staged": {
     "*": "prettier --write --ignore-unknown"
@@ -50,7 +42,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
     "prettier": "^3.5.3",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "vitest": "^3.1.1"
   },
   "peerDependencies": {
     "typescript": "^5"
