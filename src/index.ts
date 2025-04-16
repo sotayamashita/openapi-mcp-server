@@ -88,6 +88,9 @@ async function runServer() {
   for (const [path, pathItem] of Object.entries(openApiDoc.paths)) {
     if (!pathItem) continue;
 
+    // Extract path-level parameters
+    const pathLevelParameters = pathItem.parameters || [];
+
     for (const [method, operation] of Object.entries(pathItem)) {
       let operationId;
       let description;
@@ -110,11 +113,13 @@ async function runServer() {
       if (openApiVersion === "3.0") {
         inputSchema = createInputSchemaFromOperation3_0(
           operation as OpenAPIV3.OperationObject,
+          pathLevelParameters as OpenAPIV3.ParameterObject[],
         );
         argMapper = mapMcpArgsToAxiosParams3_0;
       } else if (openApiVersion === "3.1") {
         inputSchema = createInputSchemaFromOperation3_1(
           operation as OpenAPIV3_1.OperationObject,
+          pathLevelParameters as OpenAPIV3_1.ParameterObject[],
         );
         argMapper = mapMcpArgsToAxiosParams3_1;
       } else {
