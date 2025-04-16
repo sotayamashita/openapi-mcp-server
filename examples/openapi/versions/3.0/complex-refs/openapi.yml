@@ -1,0 +1,152 @@
+openapi: 3.0.0
+info:
+  title: Complex References API Example
+  version: 1.0.0
+  description: An API example with complex schema references
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /products:
+    get:
+      summary: Get all products
+      description: Returns a list of all products with their categories and variants
+      operationId: getProducts
+      responses:
+        "200":
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          $ref: "#/components/schemas/Price"
+        category:
+          $ref: "#/components/schemas/Category"
+        variants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductVariant"
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - price
+        - category
+        - createdAt
+
+    Price:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: float
+          minimum: 0
+        currency:
+          type: string
+          enum: [USD, EUR, GBP, JPY]
+        discounted:
+          type: boolean
+          default: false
+        discount:
+          $ref: "#/components/schemas/Discount"
+      required:
+        - amount
+        - currency
+
+    Discount:
+      type: object
+      properties:
+        percentage:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+        validUntil:
+          type: string
+          format: date-time
+      required:
+        - percentage
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        parent:
+          $ref: "#/components/schemas/CategoryReference"
+      required:
+        - id
+        - name
+
+    CategoryReference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+        - id
+
+    ProductVariant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Attribute"
+        price:
+          $ref: "#/components/schemas/Price"
+      required:
+        - id
+        - name
+        - attributes
+
+    Attribute:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+      required:
+        - name
+        - value
+
+    Metadata:
+      type: object
+      additionalProperties:
+        oneOf:
+          - type: string
+          - type: number
+          - type: boolean

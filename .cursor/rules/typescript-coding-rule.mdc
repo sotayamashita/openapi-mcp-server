@@ -1,0 +1,28 @@
+---
+description: 
+globs: *.js,*.ts,*.jsx,*.tsx
+alwaysApply: false
+---
+## Common
+- Use English for all comments
+
+## Comments and documentation
+
+### JSDoc tags
+
+It allows a subset of JSDoc tags. Most tags must occupy their own line, with the tag at the beginning of the line.
+
+```typescript
+/**
+ * The "param" tag must occupy its own line and may not be combined.
+ * @param left A description of the left param.
+ * @param right A description of the right param.
+ */
+function add(left: number, right: number) { ... }
+```
+
+### Document all top-level exports of modules
+
+Use /** JSDoc */ comments to communicate information to the users of your code. Avoid merely restating the property or parameter name. You should also document all properties and methods (exported/public or not) whose purpose is not immediately obvious from their name, as judged by your reviewer.
+
+Exception: Symbols that are only exported to be consumed by tooling, such as @NgModule classes, do not require comments.

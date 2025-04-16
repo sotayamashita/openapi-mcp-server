@@ -15,7 +15,7 @@ The openapi-mcp-server is a powerful bridge between OpenAPI specifications and A
 - 🔐 **Authentication Support**:
   - HTTP authentication schemes:
     - Basic authentication
-    - Bearer token authentication (JWT)
+    - Bearer token authentication (static tokens, e.g., Personal Access Tokens)
     - Other HTTP schemes as defined by [RFC 7235](https://tools.ietf.org/html/rfc7235)
   - API keys:
     - Header-based API keys
@@ -32,6 +32,7 @@ The openapi-mcp-server is a powerful bridge between OpenAPI specifications and A
 - [ ] OpenID Connect Discovery is not supported
 - [ ] Query parameter-based API keys are not supported
 - [ ] Cookie-based authentication is not supported
+- [ ] Dynamic JWT authentication (login-generated tokens) is not supported
 
 ## Installation
 
@@ -160,28 +161,15 @@ Without an `operationId`, the server attempts to generate a name using the HTTP 
 ### Development Commands
 
 ```bash
-# Run simple api server for test using simple demo/openapi.yml
-bun start:server
-
-# Run @modelcontextprotocol/inspector
-bun start:inspector
-
-# Run simple api server and @modelcontextprotocol/inspector concurrently
-bun start
-
 # Run tests
-bun test
+bun vitest run
 
 # Run tests with watch mode
-bun test --watch
+bun vitest
 
 # Run tests with coverage
-bun test --coverage
+bun vitest run --coverage
 
 # Format code
-bun run format
+bun prettier . --write
 ```
-
-### Codebase Structure
-
-For details on the codebase structure and module responsibilities, see [Codebase Structure](./docs/codebase-structure.md).

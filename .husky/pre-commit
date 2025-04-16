@@ -1,1 +1,1 @@
-npx vitest run && npx lint-staged --concurrent false
+bunx vitest run && bunx lint-staged --concurrent false

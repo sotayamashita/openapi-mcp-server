@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: API Key Auth Example
+  version: 1.0.0
+  description: An API example with API Key authentication
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+security:
+  - apiKeyAuth: []
+
+paths:
+  /api-resources:
+    get:
+      summary: Get API resources
+      description: Returns a list of API resources (requires API key)
+      operationId: getApiResources
+      responses:
+        "200":
+          description: A list of API resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiResource"
+        "401":
+          description: Unauthorized - Missing or invalid API key
+        "403":
+          description: Forbidden - API key is valid but lacks permissions
+
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      description: API key authentication
+
+  schemas:
+    ApiResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [public, private, restricted]
+        accessLevel:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 10
+          description: Resource access level from 1 (lowest) to 10 (highest)
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - type
+        - accessLevel
+        - createdAt
