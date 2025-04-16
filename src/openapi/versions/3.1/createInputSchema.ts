@@ -20,10 +20,12 @@ const EXCLUDED_HEADERS = new Set([
  * Assumes the OperationObject and its components have been fully dereferenced.
  *
  * @param {OpenAPIV3_1.OperationObject} operation - The dereferenced OpenAPI 3.1 Operation Object.
+ * @param {OpenAPIV3_1.ParameterObject[]} pathLevelParameters - Path-level parameters (from PathItemObject), default: []
  * @returns {ZodRawShape} A Zod object shape (`Record<string, ZodTypeAny>`) suitable for `z.object()`.
  */
 export function createInputSchemaFromOperation(
   operation: OpenAPIV3_1.OperationObject,
+  pathLevelParameters: OpenAPIV3_1.ParameterObject[] = [],
 ): ZodRawShape {
   const pathSchemaMap: ZodRawShape = {};
   const querySchemaMap: ZodRawShape = {};
@@ -31,101 +33,79 @@ export function createInputSchemaFromOperation(
   const requiredQuery: string[] = [];
   const requiredHeader: string[] = [];
 
-  // 1. Process Parameters (path, query, header)
-  if (operation.parameters) {
-    operation.parameters.forEach((param) => {
-      // Ensure parameter is a ParameterObject (already dereferenced)
-      if (!param || typeof param !== "object" || !("in" in param)) {
-        // Skip if it's somehow a ReferenceObject or invalid
-        console.error("Skipping unexpected or unresolved parameter:", param);
-        return;
-      }
-
-      const paramObj = param as OpenAPIV3_1.ParameterObject;
-      const paramName = paramObj.name;
-      if (!paramName) {
-        console.error("Skipping parameter due to missing name:", param);
-        return;
-      }
-
-      // Check if the parameter is defined using 'schema'
-      // NOTE: Currently ignoring parameters defined using 'content'. Handling these
-      // would require choosing a media type and extracting the schema from there.
+  // Merge path-level and operation-level parameters (operation.parameters takes precedence)
+  const mergedParameters: OpenAPIV3_1.ParameterObject[] = [
+    ...pathLevelParameters,
+    ...((operation.parameters as OpenAPIV3_1.ParameterObject[] | undefined) ??
+      []),
+  ];
+  const seen = new Set<string>();
+  // Remove duplicates by name+in (operation.parameters has priority)
+  const dedupedParameters = mergedParameters
+    .reverse()
+    .filter((param) => {
       if (
-        !paramObj.schema ||
-        typeof paramObj.schema !== "object" ||
-        Array.isArray(paramObj.schema)
-      ) {
-        // Skip if schema is missing, a boolean (true/false schema in 3.1), or not an object
-        // If boolean schemas or 'content' based parameters need support, this logic needs expansion.
-        console.error(
-          `Skipping parameter "${paramName}" due to missing or unsupported schema/content definition.`,
-        );
-        return;
+        !param ||
+        typeof param !== "object" ||
+        !("name" in param) ||
+        !("in" in param)
+      )
+        return false;
+      const key = `${param.in}:${param.name}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .reverse();
+
+  // Process parameters (path, query, header)
+  dedupedParameters.forEach((param) => {
+    if (!param || typeof param !== "object" || !("in" in param)) return;
+    const paramObj = param as OpenAPIV3_1.ParameterObject;
+    if (!paramObj.name || !paramObj.schema) return;
+    const paramName = paramObj.name;
+    if (
+      !paramObj.schema ||
+      typeof paramObj.schema !== "object" ||
+      Array.isArray(paramObj.schema)
+    )
+      return;
+    const schemaObj = paramObj.schema as OpenAPIV3_1.SchemaObject;
+    let zodSchema: ZodTypeAny;
+    try {
+      zodSchema = convertOpenAPISchemaToZod(schemaObj);
+      if (paramObj.description) {
+        zodSchema = zodSchema.describe(paramObj.description);
       }
-
-      // We expect schema to be SchemaObject after dereferencing and type check
-      const schemaObj = paramObj.schema as OpenAPIV3_1.SchemaObject;
-      let zodSchema: ZodTypeAny;
-
-      try {
-        zodSchema = convertOpenAPISchemaToZod(schemaObj);
-        if (paramObj.description) {
-          zodSchema = zodSchema.describe(paramObj.description);
-        }
-      } catch (error) {
-        console.error(
-          `Failed to convert schema for parameter "${paramName}":`,
-          error,
+    } catch (error) {
+      zodSchema = z
+        .any()
+        .describe(
+          paramObj.description ||
+            `Parameter ${paramName} (schema conversion failed)`,
         );
-        // Fallback to z.any() if conversion fails
-        zodSchema = z
-          .any()
-          .describe(
-            paramObj.description ||
-              `Parameter ${paramName} (schema conversion failed)`,
-          );
-      }
-
-      switch (paramObj.in) {
-        case "path":
-          // Path parameters are always required within the pathParameters object.
-          pathSchemaMap[paramName] = zodSchema;
-          // Path parameters *must* be required per OpenAPI spec, but we don't track requiredPath
-          // because the entire pathParameters object is always required if it exists.
-          break;
-        case "query":
-          // Query parameters are optional unless explicitly required.
-          querySchemaMap[paramName] = paramObj.required
+    }
+    switch (paramObj.in) {
+      case "path":
+        pathSchemaMap[paramName] = zodSchema;
+        break;
+      case "query":
+        querySchemaMap[paramName] = paramObj.required
+          ? zodSchema
+          : zodSchema.optional();
+        if (paramObj.required) requiredQuery.push(paramName);
+        break;
+      case "header":
+        if (!EXCLUDED_HEADERS.has(paramName.toLowerCase())) {
+          headerSchemaMap[paramName] = paramObj.required
             ? zodSchema
             : zodSchema.optional();
-          if (paramObj.required) {
-            requiredQuery.push(paramName);
-          }
-          break;
-        case "header":
-          // Header parameters are optional unless explicitly required.
-          // Exclude common/sensitive headers.
-          if (!EXCLUDED_HEADERS.has(paramName.toLowerCase())) {
-            headerSchemaMap[paramName] = paramObj.required
-              ? zodSchema
-              : zodSchema.optional();
-            if (paramObj.required) {
-              requiredHeader.push(paramName);
-            }
-          }
-          break;
-        case "cookie":
-          // Ignore cookie parameters as per requirement.
-          break;
-        default:
-          console.warn(
-            `Unknown parameter location "${paramObj.in}" for parameter "${paramName}". Skipping.`,
-          );
-          break;
-      }
-    });
-  }
+          if (paramObj.required) requiredHeader.push(paramName);
+        }
+        break;
+      // 'cookie' parameters are ignored for now
+    }
+  });
 
   // 2. Process Request Body
   let requestBodySchema: ZodTypeAny | null = null;
