@@ -1,6 +1,6 @@
 {
   "name": "@openapi-mcp/server",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "MCP Server that dynamically generates tools from an OpenAPI specification.",
   "keywords": [
     "openapi",
