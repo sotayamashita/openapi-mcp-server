@@ -1,9 +1,48 @@
 {
-  "name": "openapi-mcp-server",
-  "type": "module",
+  "name": "@openapi-mcp/server",
+  "version": "0.0.0",
+  "description": "MCP Server that dynamically generates tools from an OpenAPI specification.",
+  "keywords": [
+    "openapi",
+    "swagger",
+    "oas",
+    "mcp",
+    "model-context-protocol",
+    "server",
+    "tool",
+    "bridge",
+    "cli",
+    "api",
+    "ai",
+    "llm"
+  ],
+  "homepage": "https://github.com/sotayamashita/openapi-mcp-server",
+  "bugs": {
+    "url": "https://github.com/sotayamashita/openapi-mcp-server/issues"
+  },
+  "license": "MIT",
+  "author": "Sota Yamashita",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "openapi-mcp-server": "dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sotayamashita/openapi-mcp-server.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "commit": "cz",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build": "bun build --target=node --outfile=dist/index.js src/index.ts"
   },
   "lint-staged": {
     "*": "bunx prettier --write --ignore-unknown"
@@ -45,5 +84,6 @@
   },
   "peerDependencies": {
     "typescript": "^5"
-  }
+  },
+  "type": "module"
 }
