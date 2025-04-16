@@ -40,7 +40,9 @@ export function loadConfig(): ServerConfig {
   let headers = DEFAULT_HEADERS;
   if (process.env.HEADERS) {
     try {
-      const customHeaders = JSON.parse(process.env.HEADERS);
+      // Handle escaped double quotes
+      const headerString = process.env.HEADERS.replace(/\\"/g, '"');
+      const customHeaders = JSON.parse(headerString);
       headers = { ...DEFAULT_HEADERS, ...customHeaders };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";

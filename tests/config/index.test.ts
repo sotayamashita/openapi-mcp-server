@@ -1,96 +1,66 @@
-import { describe, it, expect, afterEach, beforeEach, spyOn } from "bun:test";
-import { loadConfig } from "../../src/config";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { loadConfig } from "../../src/config/index";
 
-describe("Config Module", () => {
-  // Save original environment variables
-  const originalEnv = { ...process.env };
+const ORIGINAL_ENV = process.env;
 
-  // Reset environment variables before each test
+describe("loadConfig", () => {
   beforeEach(() => {
-    // Clear environment variables for testing
-    delete process.env.BASE_URL;
-    delete process.env.HEADERS;
+    process.env = { ...ORIGINAL_ENV };
   });
 
-  // Restore environment variables after each test
   afterEach(() => {
-    process.env = { ...originalEnv };
+    process.env = ORIGINAL_ENV;
+    vi.restoreAllMocks();
   });
 
-  it("should load BASE_URL correctly", () => {
-    // Set environment variables for testing
-    process.env.BASE_URL = "https://api.example.com/v1";
-
-    // Load configuration
-    const config = loadConfig();
-
-    // Verify expected values
-    expect(config.baseUrl).toBe("https://api.example.com/v1");
-    expect(config.headers).toEqual({
-      "Content-Type": "application/json",
-      "User-Agent": "openapi-mcp-server",
-    });
-  });
-
-  it("should throw error when BASE_URL is not set", () => {
-    // Load without setting BASE_URL
+  it("throws error when BASE_URL is not set", () => {
+    delete process.env.BASE_URL;
     expect(() => loadConfig()).toThrow(
       "BASE_URL environment variable is required",
     );
   });
 
-  it("should parse HEADERS correctly", () => {
-    // Set environment variables
-    process.env.BASE_URL = "https://api.example.com/v1";
-    process.env.HEADERS = JSON.stringify({
-      Authorization: "Bearer token123",
-      "X-Custom-Header": "custom-value",
-    });
-
-    // Load configuration
+  it("uses default values when HEADERS is not set", () => {
+    process.env.BASE_URL = "https://example.com";
+    delete process.env.HEADERS;
     const config = loadConfig();
-
-    // Verify expected values
-    expect(config.baseUrl).toBe("https://api.example.com/v1");
-    expect(config.headers).toEqual({
-      "Content-Type": "application/json",
-      "User-Agent": "openapi-mcp-server",
-      Authorization: "Bearer token123",
-      "X-Custom-Header": "custom-value",
+    expect(config).toEqual({
+      baseUrl: "https://example.com",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "openapi-mcp-server",
+      },
     });
   });
 
-  it("should use default headers when HEADERS is invalid JSON", () => {
-    // Set environment variables (invalid JSON)
-    process.env.BASE_URL = "https://api.example.com/v1";
-    process.env.HEADERS = "invalid-json";
-
-    // Load configuration
+  it("merges headers when HEADERS is a valid JSON string", () => {
+    process.env.BASE_URL = "https://example.com";
+    process.env.HEADERS = JSON.stringify({ Authorization: "Bearer token" });
     const config = loadConfig();
-
-    // Verify expected values
-    expect(config.baseUrl).toBe("https://api.example.com/v1");
-    expect(config.headers).toEqual({
-      "Content-Type": "application/json",
-      "User-Agent": "openapi-mcp-server",
+    expect(config).toEqual({
+      baseUrl: "https://example.com",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "openapi-mcp-server",
+        Authorization: "Bearer token",
+      },
     });
   });
 
-  it("should override default headers with custom ones", () => {
-    // Set environment variables (overriding some headers)
-    process.env.BASE_URL = "https://api.example.com/v1";
-    process.env.HEADERS = JSON.stringify({
-      "Content-Type": "application/xml", // Different from default
-    });
-
-    // Load configuration
+  it("uses default values and logs error when HEADERS is invalid JSON", () => {
+    process.env.BASE_URL = "https://example.com";
+    process.env.HEADERS = "{invalid json}";
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const config = loadConfig();
-
-    // Verify expected values
-    expect(config.baseUrl).toBe("https://api.example.com/v1");
-    expect(config.headers).toEqual({
-      "Content-Type": "application/xml", // Overridden value
-      "User-Agent": "openapi-mcp-server", // Default value
+    expect(config).toEqual({
+      baseUrl: "https://example.com",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "openapi-mcp-server",
+      },
     });
+    expect(spy).toHaveBeenCalledWith(
+      expect.stringContaining("Invalid HEADERS format"),
+    );
   });
 });

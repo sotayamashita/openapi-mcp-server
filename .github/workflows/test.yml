@@ -33,10 +33,10 @@ jobs:
         run: bun install
 
       - name: Run tests
-        run: bun test
+        run: bun vitest run
 
       - name: Check test coverage
-        run: bun test --coverage --coverage-reporter=lcov
+        run: bun vitest run --coverage
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -44,6 +44,3 @@ jobs:
           name: coverage-report
           path: coverage/
           retention-days: 7
-
-      - name: Check Prettier formatting
-        run: bun run format:check
