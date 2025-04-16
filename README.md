@@ -6,6 +6,9 @@ The openapi-mcp-server is a powerful bridge between OpenAPI specifications and A
 
 ## Features
 
+> **⚠️ Note:**
+> This server **requires** every operation in your OpenAPI/Swagger specification to have an `operationId`. If any operation is missing an `operationId`, the server will fail to start or process the specification. Always ensure that all operations are explicitly assigned a unique and descriptive `operationId`.
+
 - 🔌 **OpenAPI Integration**
   - Automatically converts OpenAPI/Swagger specifications into MCP tools
 - 🧩 **Parameter Validation**
@@ -154,7 +157,29 @@ paths:
       description: Returns detailed information about a specific user
 ```
 
-Without an `operationId`, the server attempts to generate a name using the HTTP method and path, but this is less descriptive and may lead to less intuitive tool names for AI assistants.
+#### Include Detailed Operation Descriptions
+
+The `description` field for each operation is equally important:
+
+- **Tool Selection**: AI assistants use this description to determine which tool is appropriate for a given task
+- **Understanding**: Comprehensive descriptions help the AI understand exactly what the operation does
+- **Context**: Include information about parameters, expected responses, and potential errors
+
+Example of a well-described operation:
+
+```yaml
+paths:
+  /users:
+    post:
+      operationId: createUser
+      summary: Create a new user account
+      description: |
+        Creates a new user in the system. Requires a unique email address and a 
+        password that meets security requirements (min 8 chars, including uppercase, 
+        lowercase, number). Returns the created user object with an assigned user ID.
+```
+
+Without thorough descriptions, AI assistants may struggle to identify the right operations for user requests or may use them incorrectly. The quality of your API descriptions directly impacts how effectively AI can leverage your tools.
 
 ## Development
 
