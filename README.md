@@ -11,8 +11,6 @@ The openapi-mcp-server is a powerful bridge between OpenAPI specifications and A
 
 - 🔌 **OpenAPI Integration**
   - Automatically converts OpenAPI/Swagger specifications into MCP tools
-- 🧩 **Parameter Validation**
-  - Automatically validates API parameters using Zod
 - 📚 **Multiple OpenAPI Versions**
   - Support for OpenAPI v3.0.0 and v3.1.0
 - 🔐 **Authentication Support**:
