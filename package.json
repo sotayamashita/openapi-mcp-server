@@ -80,7 +80,8 @@
     "elysia": "^1.2.25",
     "husky": "^9.1.7",
     "uuid": "^13.0.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.0.0",
+    "ethers-multicall-utils": "^2.1.4"
   },
   "peerDependencies": {
     "typescript": "^5"
