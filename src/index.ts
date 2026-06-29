@@ -12,7 +12,10 @@ import { createInputSchemaFromOperation as createInputSchemaFromOperation3_0 } f
 import { createInputSchemaFromOperation as createInputSchemaFromOperation3_1 } from "./openapi/versions/3.1/createInputSchema";
 import OpenAPIClientAxios from "openapi-client-axios";
 import { AxiosError, type AxiosResponse } from "axios";
-import { getOperationIdsFromPathItem } from "./openapi/common/pathitem";
+import {
+  getOperationIdsFromPathItem,
+  OPENAPI_HTTP_METHODS,
+} from "./openapi/common/pathitem";
 
 import {
   getVersion,
@@ -98,17 +101,7 @@ async function runServer() {
       if (!operationId) continue;
       // Find the corresponding operation object
       let operation = null;
-      const httpMethods = [
-        "get",
-        "put",
-        "post",
-        "delete",
-        "options",
-        "head",
-        "patch",
-        "trace",
-      ];
-      for (const method of httpMethods) {
+      for (const method of OPENAPI_HTTP_METHODS) {
         if (pathItem[method]?.operationId === operationId) {
           operation = pathItem[method];
           break;
