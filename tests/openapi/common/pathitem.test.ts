@@ -3,7 +3,10 @@
  * Ensures that only HTTP method operations are considered and path-level parameters are ignored.
  */
 import { describe, it, expect } from "vitest";
-import { getOperationIdsFromPathItem } from "../../../src/openapi/common/pathitem";
+import {
+  getOperationIdsFromPathItem,
+  OPENAPI_HTTP_METHODS,
+} from "../../../src/openapi/common/pathitem";
 
 // Minimal mock of a PathItemObject with path-level parameters and valid operations
 const pathItem: any = {
@@ -34,5 +37,18 @@ describe("getOperationIdsFromPathItem", () => {
   it("returns only operationIds for HTTP methods, ignoring non-operation properties", () => {
     const ids = getOperationIdsFromPathItem(pathItem);
     expect(ids).toEqual(["getUserById", "updateUser"]);
+  });
+
+  it("returns operationIds for every OpenAPI HTTP method", () => {
+    const pathItemWithEveryMethod = Object.fromEntries(
+      OPENAPI_HTTP_METHODS.map((method) => [
+        method,
+        { operationId: `${method}Operation` },
+      ]),
+    );
+
+    expect(getOperationIdsFromPathItem(pathItemWithEveryMethod)).toEqual(
+      OPENAPI_HTTP_METHODS.map((method) => `${method}Operation`),
+    );
   });
 });

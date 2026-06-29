@@ -5,21 +5,22 @@
  * @param pathItem - The OpenAPI PathItemObject
  * @returns Array of operationIds (string or undefined)
  */
+export const OPENAPI_HTTP_METHODS = [
+  "get",
+  "put",
+  "post",
+  "delete",
+  "options",
+  "head",
+  "patch",
+  "trace",
+] as const;
+
 export function getOperationIdsFromPathItem(
   pathItem: any,
 ): Array<string | undefined> {
   const ids: Array<string | undefined> = [];
-  const httpMethods = [
-    "get",
-    "put",
-    "post",
-    "delete",
-    "options",
-    "head",
-    "patch",
-    "trace",
-  ];
-  for (const method of httpMethods) {
+  for (const method of OPENAPI_HTTP_METHODS) {
     const operation = pathItem[method];
     if (!operation) continue;
     ids.push((operation as any).operationId);
