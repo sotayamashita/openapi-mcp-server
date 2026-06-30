@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "xquik": {
+      "command": "bun",
+      "args": [
+        "/path/to/openapi-mcp-server/src/index.ts",
+        "--api",
+        "https://xquik.com/openapi.json"
+      ],
+      "env": {
+        "BASE_URL": "https://xquik.com",
+        "HEADERS": "{\"x-api-key\":\"YOUR_XQUIK_API_KEY\"}"
+      }
+    }
+  }
+}
